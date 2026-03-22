@@ -4,3 +4,7 @@ __pycache__/
 *.egg-info/
 .env
 CLAUDE_CODE_CONTEXT.md
+src/demo.py
+src/hash_commitment.py
+src/kzg_commitment.py
+src/neural_network.py
