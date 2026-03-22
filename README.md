@@ -14,18 +14,12 @@ This project demonstrates the post-quantum vulnerability of the KZG polynomial c
 src/
   part1_demo.py       — Main entry point: runs the full Part 1 demonstration end-to-end
   kzg_pc_full.py      — Complete KZG polynomial commitment scheme (all 7 PC operations from Definition 2.2)
-  kzg_commitment.py   — KZG-style polynomial commitment and full attack chain
   bsgs_attack.py      — Baby-step Giant-step attack on ECDLP (quantum vulnerability surrogate)
   ecc_utils.py        — Small elliptic curve arithmetic over a finite field
-  hash_commitment.py  — Hash-based commitment scheme (post-quantum FRI + Poseidon replacement)
-  neural_network.py   — Neural network wrapper for Session 3 integration
-  demo.py             — End-to-end demo runner (Session 4 — final deliverable)
 results/
   part1_output.txt    — Captured output from Part 1 demonstration run
-  demo_output.txt     — Captured output from full end-to-end demo
 arthemis.pdf          — Lycklama et al. Artemis paper (arXiv:2409.12055)
 ECC.pdf               — Reference material on elliptic curve cryptography
-CLAUDE_CODE_CONTEXT.md — Context document used during AI-assisted development
 ```
 
 ## How to Run
