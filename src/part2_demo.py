@@ -35,6 +35,7 @@ _SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, _SCRIPT_DIR)
 
 from ecc_utils import EllipticCurve, CURVE_A, CURVE_B, CURVE_P
+import ecc_utils_32bit as _ecc32
 from bsgs_attack import bsgs
 import kzg_pc_full as _kzg
 from fri_commitment import (
@@ -960,10 +961,15 @@ def main():
 
         print_title()
 
-        # Build curve (used in Session D for the failed BSGS attempt)
+        # Build 9-bit curve (used in Session D for the failed BSGS attempt)
         curve = EllipticCurve(CURVE_A, CURVE_B, CURVE_P)
         G = curve.find_generator()
         n = curve.compute_group_order(G)
+
+        # Build 32-bit curve (used in Session H for live KZG comparison)
+        curve_32 = _ecc32.EllipticCurve(_ecc32.CURVE_A, _ecc32.CURVE_B, _ecc32.CURVE_P)
+        G_32 = curve_32.find_generator()
+        n_32 = curve_32.compute_group_order(G_32)
 
         # ── Session A ─────────────────────────────────────────────────────────
         t0 = time.perf_counter()
@@ -1026,7 +1032,7 @@ def main():
         # ── Session H ─────────────────────────────────────────────────────────
         t0 = time.perf_counter()
         _, kzg_bsgs_ms_h = session_h(
-            curve, G, n,
+            curve_32, G_32, n_32,
             fri_setup_us=setup_us,
             fri_commit_us=commit_us,
             fri_verify_us=verify_us,
