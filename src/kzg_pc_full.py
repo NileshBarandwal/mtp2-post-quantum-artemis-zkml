@@ -732,9 +732,15 @@ def pc_batch_check(ck, c, d, Q, ys, pi, xi):
     print(f"  Step 1 — Z(τ) = {Z_tau}  (integer eval, reduced mod n for EC)")
 
     # Step 2: I(τ)·G — exact Lagrange over integers, reduce mod n
+    # Use SRS-based evaluation (matching pc_commit path) so non-prime n works
     I = lagrange_interpolate(Q, ys)
     I_tau = int_poly_eval(I, ck.tau) % n
-    I_tau_G = curve.scalar_mul(I_tau, ck.G)
+    I_tau_G = None
+    for i, Ii in enumerate(I):
+        Ii_scalar = Ii % n
+        if i < len(ck.srs) and Ii_scalar != 0:
+            term = curve.scalar_mul(Ii_scalar, ck.srs[i])
+            I_tau_G = curve.point_add(I_tau_G, term)
     print(f"  Step 2 — I(τ) = {I_tau},   I(τ)·G = {I_tau_G}")
     print()
 

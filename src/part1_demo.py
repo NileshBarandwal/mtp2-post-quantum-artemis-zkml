@@ -26,7 +26,9 @@ import math
 _SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, _SCRIPT_DIR)
 
-from ecc_utils import EllipticCurve, CURVE_A, CURVE_B, CURVE_P, print_curve_info
+#from ecc_utils import EllipticCurve, CURVE_A, CURVE_B, CURVE_P, print_curve_info
+from ecc_utils_32bit import EllipticCurve, CURVE_A, CURVE_B, CURVE_P, print_curve_info
+
 from bsgs_attack import bsgs
 from kzg_pc_full import (
     pc_setup, pc_commit, pc_verify, pc_open, pc_check,
