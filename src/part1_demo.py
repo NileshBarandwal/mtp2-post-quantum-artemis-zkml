@@ -26,8 +26,19 @@ import math
 _SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, _SCRIPT_DIR)
 
-#from ecc_utils import EllipticCurve, CURVE_A, CURVE_B, CURVE_P, print_curve_info
-from ecc_utils_32bit import EllipticCurve, CURVE_A, CURVE_B, CURVE_P, print_curve_info
+# ── Curve selection via --curve argument (9, 32, 64); default = 32 ──────────
+_CURVE_BITS = 32
+for _i, _arg in enumerate(sys.argv):
+    if _arg == "--curve" and _i + 1 < len(sys.argv):
+        _CURVE_BITS = int(sys.argv[_i + 1])
+        break
+
+if _CURVE_BITS == 9:
+    from ecc_utils import EllipticCurve, CURVE_A, CURVE_B, CURVE_P, print_curve_info
+elif _CURVE_BITS == 64:
+    from ecc_utils_64bit import EllipticCurve, CURVE_A, CURVE_B, CURVE_P, print_curve_info
+else:  # 32 (default)
+    from ecc_utils_32bit import EllipticCurve, CURVE_A, CURVE_B, CURVE_P, print_curve_info
 
 from bsgs_attack import bsgs
 from kzg_pc_full import (
