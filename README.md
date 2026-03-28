@@ -41,21 +41,17 @@ cd mtp2-post-quantum-artemis-zkml
 python3 src/part1_demo.py
 
 # Run with a specific curve size
-python3 src/part1_demo.py --curve 9   # 9-bit  → BSGS in ~0.03 ms  (instant, for quick demos)
-python3 src/part1_demo.py --curve 32  # 32-bit → BSGS in ~130 ms   (default)
-python3 src/part1_demo.py --curve 64  # 64-bit → BSGS in ~4 hours  (run in background)
-
-# Output is saved automatically to:
-# results/part1_output.txt
+python3 src/part1_demo.py --curve 9   # 9-bit  → BSGS in ~0.03 ms  → results/part1_9bit_output.txt
+python3 src/part1_demo.py --curve 32  # 32-bit → BSGS in ~130 ms   → results/part1_32bit_output.txt (default)
+python3 src/part1_demo.py --curve 64  # 64-bit → requires ~64GB RAM, not recommended locally
 ```
 
 ### Run Part 2 — FRI+Poseidon Replacement Demo
 
 ```bash
-python3 src/part2_demo.py
-
-# Output is saved automatically to:
-# results/part2_output.txt
+python3 src/part2_demo.py --kzg-curve 9   # 9-bit KZG in Session H  → results/part2_kzg9bit_output.txt
+python3 src/part2_demo.py --kzg-curve 32  # 32-bit KZG in Session H → results/part2_kzg32bit_output.txt (default)
+python3 src/part2_demo.py --kzg-curve 64  # 64-bit KZG → requires ~64GB RAM, not recommended locally
 ```
 
 ### Verify curve parameters
@@ -91,8 +87,11 @@ mtp2-post-quantum-artemis-zkml/
 │   └── neural_network.py     Simple neural network weight wrapper
 │
 ├── results/
-│   ├── part1_output.txt      Full captured output from Part 1 demo run
-│   └── part2_output.txt      Full captured output from Part 2 demo run
+│   ├── part1_9bit_output.txt       Part 1 demo — 9-bit curve  (BSGS 0.03 ms)
+│   ├── part1_32bit_output.txt      Part 1 demo — 32-bit curve (BSGS ~130 ms)
+│   ├── part1_64bit_output.txt      Part 1 demo — 64-bit curve (Sessions A-C only, BSGS killed OOM)
+│   ├── part2_kzg9bit_output.txt    Part 2 demo — FRI + 9-bit KZG comparison
+│   └── part2_kzg32bit_output.txt   Part 2 demo — FRI + 32-bit KZG comparison (default)
 │
 └── README.md
 ```
@@ -227,6 +226,13 @@ The 32-bit curve is chosen as the demo default because BSGS takes ~130 ms — sl
 | BN254 (production) | 254 | 2¹²⁷ steps | Age of universe | O(254³) ≈ 16.4M ops |
 
 > **Critical note:** All ECC curves — regardless of size — are broken by Shor's algorithm. The classical BSGS infeasibility of BN254 provides no protection against quantum adversaries. Only hash-based schemes (FRI+Poseidon) provide post-quantum security.
+
+> **Note on 64-bit local execution:** Running --curve 64 or --kzg-curve 64
+> locally is not recommended. The BSGS baby steps table requires ~64 GB RAM
+> (2³² points × 16 bytes each). The partial output from the 64-bit run
+> (results/part1_64bit_output.txt) shows Sessions A–C completing successfully
+> on the 64-bit curve before BSGS is terminated by the OS out-of-memory killer
+> — which itself confirms the classical infeasibility argument.
 
 ---
 
