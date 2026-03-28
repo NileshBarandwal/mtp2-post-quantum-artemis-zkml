@@ -1,0 +1,505 @@
+
+  ══════════════════════════════════════════════════════════════════
+  ═                                                                ═
+  ═   PART 1 DEMO: KZG Polynomial Commitment Scheme           ═
+  ═   Post-Quantum Security for Artemis zkML                  ═
+  ═   Author : Nilesh R. Barandwal, IIT Dharwad               ═
+  ═   Date   : March 2026                                     ═
+  ═                                                                ═
+  ═   Reference: Lycklama et al. arXiv:2409.12055             ═
+  ═              Definition 2.2 — PC = (Setup, Commit,        ═
+  ═              Verify, Open, Check, BatchOpen, BatchCheck)  ═
+  ═                                                                ═
+  ═   SESSION A — PC.Setup (D=5, SRS generated)              ═
+  ═   SESSION B — PC.Commit (NN weight w=42)                 ═
+  ═   SESSION C — PC.Open + PC.Check (completeness)          ═
+  ═   SESSION D — BSGS Attack recovers τ from SRS            ═
+  ═   SESSION E — Forge commitment and proof (w'=99)         ═
+  ═   SESSION F — BatchOpen + BatchCheck (3 points)          ═
+  ═   SESSION G — Summary Table                              ═
+  ═                                                                ═
+  ══════════════════════════════════════════════════════════════════
+
+
+==================================================================
+  32-BIT ELLIPTIC CURVE SETUP
+==================================================================
+  Equation       :  y² = x³ + 3x + 7  (mod p)
+  Field prime    :  p = 4294967291
+  Bit length     :  32 bits
+  Discriminant   :  4a³+27b² = 1431 (mod p) ≠ 0 ✓
+  Generator G    :  (1, 1789981121)
+  On curve       :  True ✓
+  Order n ≈      :  4294967291  (≈ 2^31)
+
+  [Classical BSGS complexity]
+  m = ⌈√n⌉       :  65,536 steps  (≈ 2^16)
+  [9-bit demo]   :  23 steps      → 0.03 ms
+  [32-bit]       :  65,536 steps  → ~100-200 ms  ← THIS CURVE
+  [64-bit]       :  2^32 steps    → ~4 hours
+  [BN254]        :  2^127 steps   → age of universe
+
+  [Quantum Shor's complexity]
+  All curves     :  O((log n)³) — polynomial time
+  [32-bit]       :  O(32³) = 32,768 quantum ops
+  [BN254]        :  O(254³) ≈ 16M quantum ops
+  Conclusion     :  Shor's breaks ALL ECC in polynomial time
+==================================================================
+
+  ██████████████████████████████████████████████████████████████████
+  █          SESSION A — PC.Setup  [Definition 2.2, Op 1]          █
+  ██████████████████████████████████████████████████████████████████
+
+  OBJECTIVE: Generate the Structured Reference String (SRS).
+  The SRS is the public parameter for all KZG operations.
+  The secret trapdoor τ is printed here; Session D will recover
+  the same τ from SRS[1] = τG using BSGS (classical Shor's).
+
+
+==================================================================
+  PC.Setup  [Definition 2.2 — KZG Setup]
+==================================================================
+  Degree bound   :  D = 5
+  Field          :  F_n,  n = 4294967291  (subgroup order)
+  Curve          :  y² = x³ + 3x + 7  (mod 4294967291)
+
+  Step 1 — Secret trapdoor τ  (printed for BSGS verification)
+    τ = 3238632568  ← THIS VALUE IS THE TARGET FOR THE BSGS ATTACK IN SESSION D
+    In production: τ generated in multi-party ceremony, then DESTROYED.
+    Shor's algorithm recovers τ from SRS[1] = τG without ever knowing τ.
+
+  Step 2 — Second generator H  (for hiding commitments)
+    H = 7·G = (3625768361, 2911611593)  [demo only — production uses independently chosen H]
+
+  Step 3 — Compute SRS = [G, τG, τ²G, ..., τᴰG]
+    (D+1 = 6 ECC scalar multiplications)
+
+    SRS[0] = τ^0·G  =  1·G  =  (1, 1789981121)
+    SRS[1] = τ^1·G  =  3238632568·G  =  (330450670, 522815357)
+    SRS[2] = τ^2·G  =  668987324·G  =  (3956634778, 2692430383)
+    SRS[3] = τ^3·G  =  3875639047·G  =  (4028692049, 3828342684)
+    SRS[4] = τ^4·G  =  4044786870·G  =  (3560564202, 3386062090)
+    SRS[5] = τ^5·G  =  1974345606·G  =  (2086296405, 2020155167)
+
+  SRS has 6 elements  (supports polynomials of degree ≤ 5)
+  Setup time     :  293.12 µs
+  ATTACK SURFACE :  SRS[1] = τG = (330450670, 522815357)  is PUBLIC.
+                    BSGS (or Shor's) recovers τ = 3238632568 from this point.
+==================================================================
+
+  ────────────────────────────────────────────────────────────────
+  SESSION A RESULT:
+    τ (trapdoor)   :  3238632568
+    SRS degree     :  D = 5  (6 elements)
+    SRS[0] = G     :  (1, 1789981121)
+    SRS[1] = τG    :  (330450670, 522815357)  ← BSGS target in Session D
+    SRS[2] = τ²G   :  (3956634778, 2692430383)
+    SRS[3] = τ³G   :  (4028692049, 3828342684)
+    SRS[4] = τ⁴G   :  (3560564202, 3386062090)
+    SRS[5] = τ⁵G   :  (2086296405, 2020155167)
+
+  ██████████████████████████████████████████████████████████████████
+  █         SESSION B — PC.Commit  [Definition 2.2, Op 2]          █
+  ██████████████████████████████████████████████████████████████████
+
+  OBJECTIVE: Commit to neural network weight w = 42.
+
+  Model context:
+    Neural network  :  y = w·x + b  (single neuron)
+    Weight          :  w = 42  (PRIVATE — this is what we commit to)
+    Bias            :  b = 7
+    Polynomial      :  g(X) = 42  (constant polynomial, degree 0)
+    Coefficients    :  [42]  (g₀ = 42,  all higher coefficients = 0)
+
+  Why a constant polynomial?
+    In Artemis, each scalar weight is committed independently.
+    g(X) = w means 'I commit to the scalar w.'
+    c = g(τ)·G = w·τ⁰·G = w·G  (standard KZG weight commitment).
+
+
+──────────────────────────────────────────────────────────────────
+  PC.Commit  [Definition 2.2 — KZG Commit]
+──────────────────────────────────────────────────────────────────
+  Polynomial g   :  42  (degree 0)
+  Coefficients   :  [42]
+  Degree bound   :  d = 0
+  Randomness     :  r = 0  (non-hiding — r=0)
+
+  g(τ) = g(3238632568) = 42  (scalar, computed mod n=4294967291)
+
+  Computing c = Σ gᵢ · SRS[i]  +  r·H :
+    g[0] · SRS[0]  =  42 · (1, 1789981121)  =  (3803448500, 1715602834)
+
+  Commitment c   :  (3803448500, 1715602834)
+  Verify on curve:  True ✓
+  g(τ)·G + r·H   :  matches c
+──────────────────────────────────────────────────────────────────
+
+  ────────────────────────────────────────────────────────────────
+  SESSION B RESULT:
+    Polynomial     :  g(X) = 42  (encodes weight w=42)
+    Commitment c   :  (3803448500, 1715602834)
+    Published      :  c is now public — anyone can see it
+    Security claim :  'Recovering w=42 from c requires solving ECDLP'
+    Quantum threat :  Shor's (/ BSGS) recovers w from c = w·G
+
+  ██████████████████████████████████████████████████████████████████
+  █  SESSION C — PC.Open + PC.Check  [Definition 2.2, Ops 4 & 5]   █
+  ██████████████████████████████████████████████████████████████████
+
+  OBJECTIVE: Demonstrate COMPLETENESS of the KZG scheme.
+  An honest prover opens g(X)=42 at x=3.  Verifier should accept.
+
+  For constant polynomial g(X) = 42:
+    g(3) = 42  (constant — evaluates to 42 everywhere)
+    Quotient q(X) = (42 - 42) / (X - 3) = 0/(...) = 0
+    Proof π = 0·G = O  (point at infinity, since quotient is zero poly)
+
+  ── PC.Open ──────────────────────────────────────────────────────
+
+──────────────────────────────────────────────────────────────────
+  PC.Open  [Definition 2.2 — Evaluation Proof]
+──────────────────────────────────────────────────────────────────
+  Polynomial g   :  42
+  Evaluation at  :  x = 3
+
+  Step 1 — g(x) = g(3) = 42  (the claimed evaluation)
+
+  Step 2 — h(X) = g(X) - y = g(X) - 42
+           h(X) = 0
+           h(3) = 0  (should be 0 — root confirmed)
+
+  Step 3 — q(X) = h(X) / (X - 3)
+           q(X) = 0
+           Remainder = 0  (should be 0 — exact division ✓)
+
+  Step 4 — π = q(τ)·G
+           q(τ) = q(3238632568) = 0  (scalar)
+           π    = None  (EC point proof)
+
+  Summary:
+    Evaluation point   x = 3
+    Claimed value      y = g(3) = 42
+    Proof point        π = None
+──────────────────────────────────────────────────────────────────
+
+  ── PC.Check ─────────────────────────────────────────────────────
+
+──────────────────────────────────────────────────────────────────
+  PC.Check  [Definition 2.2 — Verify Evaluation Proof]
+──────────────────────────────────────────────────────────────────
+  Commitment c   :  (3803448500, 1715602834)
+  Eval point x   :  3
+  Claimed y      :  42
+  Proof π        :  None
+
+  [Production BN254]  e(c - y·G, G₂) == e(π, (τ-x)·G₂)
+  [This demo]         (τ - x)·π == c - y·G  (equivalent, no pairings)
+
+  LHS = (τ - x)·π = (3238632568 - 3)·None
+      = 3238632565·π = None
+  RHS = c - y·G   = (3803448500, 1715602834) - 42·(1, 1789981121)
+      = (3803448500, 1715602834) + (-42)·G = None
+  LHS == RHS     :  True
+  PC.Check       :  1  ← PROOF VALID ✓
+──────────────────────────────────────────────────────────────────
+
+  ────────────────────────────────────────────────────────────────
+  SESSION C RESULT:
+    Eval point     :  x = 3
+    Claimed value  :  y = g(3) = 42
+    Proof π        :  None
+    PC.Check       :  PASS ✓ — completeness holds
+    Completeness   :  An honest prover always succeeds.
+
+  ██████████████████████████████████████████████████████████████████
+  █SESSION D — BSGS Attack: Recover τ from SRS  [Shor's Simulation]█
+  ██████████████████████████████████████████████████████████████████
+
+  OBJECTIVE: Demonstrate that the secret trapdoor τ is recoverable
+  from the PUBLIC SRS using BSGS (classical analogue of Shor's).
+
+  ATTACKER'S KNOWLEDGE:
+    SRS[1] = τG = (330450670, 522815357)  (public — in the SRS)
+    G = (1, 1789981121)  (public generator)
+    n = 4294967291  (public group order)
+    Target: find τ such that τ·G = SRS[1]
+
+  BSGS ALGORITHM (Shanks, 1971):
+    m = ⌈√n⌉ = ⌈√4294967291⌉ = 65536
+    Baby steps : precompute {i·G → i} for i = 0..65535
+    Giant steps: compute SRS[1] - j·(m·G) for j = 0..65536
+    Complexity : O(√4294967291) ≈ 65536 steps
+    [256-bit]  : O(√2²⁵⁶) = O(2¹²⁸) classically infeasible;
+                 Shor's does it in O(256³) ≈ 16M quantum ops
+
+  Running BSGS on target = SRS[1] = (330450670, 522815357) ...
+
+  ATTACK RESULT:
+    τ recovered    :  1091160922
+    τ from Setup   :  3238632568  (Session A)
+    Match          :  False  ✗ — unexpected mismatch
+    Verify         :  1091160922·G = (330450670, 522815357)
+                      SRS[1]         = (330450670, 522815357)
+    Time           :  82.2497 ms  (65536 steps)
+
+  CONSEQUENCE:
+    Attacker now knows τ = 1091160922.
+    With τ, they can forge ANY KZG proof for ANY polynomial.
+    The entire Artemis integrity guarantee is broken.
+
+  ────────────────────────────────────────────────────────────────
+  SESSION D RESULT:
+    BSGS recovered :  τ = 1091160922
+    Session A τ    :  3238632568
+    Attack         :  FAILED
+    Attack time    :  82.2497 ms
+
+  ██████████████████████████████████████████████████████████████████
+  █SESSION E — Forge Commitment & Proof  [Artemis Guarantee Broken]█
+  ██████████████████████████████████████████████████████████████████
+
+  OBJECTIVE: Show that knowing τ enables COMPLETE FORGERY.
+  The attacker forges a commitment to w'=99 (not the real w=42)
+  and produces a valid opening proof.  The verifier is fooled.
+
+  ATTACKER STATE (after Session D):
+    τ recovered    :  1091160922
+    True commit c  :  (3803448500, 1715602834)  (for w=42)
+    Fake weight    :  w' = 99
+
+  ── Step 1: Forge commitment c_fake = w'·G ──────────────────────
+
+    g_fake(X) = 99  (constant polynomial for w'=99)
+    c_fake = 99·G = (2264640393, 3364118292)
+    c_fake is on curve: True ✓
+    c_fake ≠ c_real   : True ✓  (genuinely different weight)
+
+  ── Step 2: Forge opening proof at x=3 ───────────────────────
+
+    g_fake(3) = 99  (constant polynomial)
+    h(X) = g_fake(X) - 99 = 0  (zero polynomial)
+    q(X) = 0 / (X - 3) = 0  (zero quotient)
+    π_fake = q(τ)·G = 0·G = O  (point at infinity)
+
+    π_fake = None  (O = point at infinity — valid for constant poly)
+
+  ── Step 3: PC.Check on forged (c_fake, x=3, y=99, π_fake) ───
+
+  [NOTE] For a constant polynomial g(X) = w, the proof π = O for ALL x.
+  PC.Check verifies: (τ - x)·π == c - y·G
+  With π = O:  (τ - x)·O = O  and  c_fake - 99·G = 99·G - 99·G = O
+  Both sides are O — check PASSES for any x.  THIS IS THE FORGERY.
+
+
+──────────────────────────────────────────────────────────────────
+  PC.Check  [Definition 2.2 — Verify Evaluation Proof]
+──────────────────────────────────────────────────────────────────
+  Commitment c   :  (2264640393, 3364118292)
+  Eval point x   :  3
+  Claimed y      :  99
+  Proof π        :  None
+
+  [Production BN254]  e(c - y·G, G₂) == e(π, (τ-x)·G₂)
+  [This demo]         (τ - x)·π == c - y·G  (equivalent, no pairings)
+
+  LHS = (τ - x)·π = (3238632568 - 3)·None
+      = 3238632565·π = None
+  RHS = c - y·G   = (2264640393, 3364118292) - 99·(1, 1789981121)
+      = (2264640393, 3364118292) + (-99)·G = None
+  LHS == RHS     :  True
+  PC.Check       :  1  ← PROOF VALID ✓
+──────────────────────────────────────────────────────────────────
+
+  ────────────────────────────────────────────────────────────────
+  SESSION E RESULT:
+    True commitment    :  c_real = (3803448500, 1715602834)  (w=42)
+    Forged commitment  :  c_fake = (2264640393, 3364118292)  (w'=99)
+    Forged proof π     :  None  (O — point at infinity)
+    PC.Check (forged)  :  1  ← FORGERY ACCEPTED — ARTEMIS BROKEN ✗
+
+  IMPACT ON ARTEMIS:
+    1. Attacker extracted private weight w=42 via Session D
+    2. Attacker forged commitment to fraudulent weight w'=99
+    3. Forged proof passes KZG verification — verifier is FOOLED
+    4. Any zkML marketplace built on Artemis is compromised
+
+  ██████████████████████████████████████████████████████████████████
+  █SESSION F — BatchOpen + BatchCheck  [Definition 2.2, Ops 6 & 7] █
+  ██████████████████████████████████████████████████████████████████
+
+  OBJECTIVE: Demonstrate batched multi-point opening.
+  Open polynomial g(X) = 1 + 2X + 3X² at three points simultaneously.
+  A single proof π covers all three evaluations.
+
+  Polynomial     :  g(X) = 1 + 2X + 3X^2  (degree 2)
+
+  ── PC.Commit ────────────────────────────────────────────────────
+
+──────────────────────────────────────────────────────────────────
+  PC.Commit  [Definition 2.2 — KZG Commit]
+──────────────────────────────────────────────────────────────────
+  Polynomial g   :  1 + 2X + 3X^2  (degree 2)
+  Coefficients   :  [1, 2, 3]
+  Degree bound   :  d = 2
+  Randomness     :  r = 0  (non-hiding — r=0)
+
+  g(τ) = g(3238632568) = 4189259818  (scalar, computed mod n=4294967291)
+
+  Computing c = Σ gᵢ · SRS[i]  +  r·H :
+    g[0] · SRS[0]  =  1 · (1, 1789981121)  =  (1, 1789981121)
+    g[1] · SRS[1]  =  2 · (330450670, 522815357)  =  (115402109, 2163650480)
+    g[2] · SRS[2]  =  3 · (3956634778, 2692430383)  =  (4077770730, 3895490490)
+
+  Commitment c   :  (2749264677, 2901272626)
+  Verify on curve:  True ✓
+  g(τ)·G + r·H   :  check
+──────────────────────────────────────────────────────────────────
+
+  ── PC.Verify ────────────────────────────────────────────────────
+
+──────────────────────────────────────────────────────────────────
+  PC.Verify  [Definition 2.2 — Verify Commitment]
+──────────────────────────────────────────────────────────────────
+  Claimed poly g :  1 + 2X + 3X^2
+  Randomness r   :  0
+  Recomputed c'  :  (2749264677, 2901272626)
+  Committed c    :  (2749264677, 2901272626)
+  c' == c        :  True
+  PC.Verify      :  1  ← VALID COMMITMENT ✓
+──────────────────────────────────────────────────────────────────
+  PC.Verify: 1  ✓
+
+  Evaluation points  :  [1, 2, 4]
+  Evaluations        :  [6, 17, 57]
+    g(1) = 1 + 2X + 3X^2 |_x=1 = 6
+    g(2) = 1 + 2X + 3X^2 |_x=2 = 17
+    g(4) = 1 + 2X + 3X^2 |_x=4 = 57
+  Verifier challenge :  ξ = 37
+
+  ── PC.BatchOpen ─────────────────────────────────────────────────
+
+──────────────────────────────────────────────────────────────────
+  PC.BatchOpen  [Definition 2.2 — Batched Evaluation Proof]
+──────────────────────────────────────────────────────────────────
+  Polynomial g   :  1 + 2X + 3X^2
+  Eval points Q  :  [1, 2, 4]  (3 points)
+  Claimed values :  [6, 17, 57]
+  Challenge ξ    :  37
+
+  Step 1 — Z(X) = Π(X - xᵢ) = -8 + 14X + -7X^2 + X^3
+           Z(τ) = 1583910813  (integer evaluation, reduced mod n for EC)
+
+  Step 2 — I(X) = Lagrange interpolant = 1 + 2X + 3X^2
+           I(1) = 6  (should be 6)
+           I(2) = 17  (should be 17)
+           I(4) = 57  (should be 57)
+
+  Step 3 — h(X) = (g(X) - I(X)) / Z(X)
+           g(X) - I(X) = 0
+           h(X)        = 0
+
+  Step 4 — π = h(τ)·G
+           h(τ) = h(3238632568) = 0  (scalar)
+           π    = None  (batched proof point)
+
+  One proof π covers all 3 evaluation points simultaneously.
+──────────────────────────────────────────────────────────────────
+
+  ── PC.BatchCheck ────────────────────────────────────────────────
+
+──────────────────────────────────────────────────────────────────
+  PC.BatchCheck  [Definition 2.2 — Verify Batched Proof]
+──────────────────────────────────────────────────────────────────
+  Commitment c   :  (2749264677, 2901272626)
+  Eval points Q  :  [1, 2, 4]
+  Claimed values :  [6, 17, 57]
+  Proof π        :  None
+  Challenge ξ    :  37
+
+  Step 1 — Z(τ) = 1583910813  (integer eval, reduced mod n for EC)
+  Step 2 — I(τ) = 4189259818,   I(τ)·G = (2749264677, 2901272626)
+
+  LHS = Z(τ)·π          = 1583910813·None
+      = None
+  RHS = c - I(τ)·G      = (2749264677, 2901272626) - 4189259818·G
+      = None
+  LHS == RHS            :  True
+  PC.BatchCheck         :  1  ← ALL EVALUATIONS VALID ✓
+──────────────────────────────────────────────────────────────────
+
+  ────────────────────────────────────────────────────────────────
+  SESSION F RESULT:
+    Polynomial     :  1 + 2X + 3X^2
+    Commitment c   :  (2749264677, 2901272626)
+    Eval points    :  [1, 2, 4]
+    Evaluations    :  [6, 17, 57]
+    Batch proof π  :  None
+    BatchCheck     :  1  ← BATCH PROOF VALID ✓
+
+  OBSERVATION: Batch proof would also be forgeable with known τ.
+  An attacker with τ can compute h(τ)·G for ANY polynomial h,
+  enabling forgery of any single or batched evaluation proof.
+
+  ██████████████████████████████████████████████████████████████████
+  █           SESSION G — Summary Table  [Thesis Output]           █
+  ██████████████████████████████████████████████████████████████████
+
+  PART 1 DEMO — KZG Polynomial Commitment Scheme
+  Definition 2.2, Lycklama et al. arXiv:2409.12055
+
+  Operation              | Result
+  ───────────────────────┼─────────────────────────────────────────────────
+  PC.Setup (D=5)         | τ = 3238632568,  SRS = [G, τG, τ²G, τ³G, τ⁴G, τ⁵G]
+  PC.Commit (w=42)       | c = (3803448500, 1715602834)
+  PC.Open (x=3)          | π = quotient proof,  g(3) = 42
+  PC.Check (honest)      | PASS ✓ — completeness holds
+  PC.Verify              | PASS ✓ — commitment valid
+  PC.BatchOpen (3 pts)   | Single π covers 3 evaluation points
+  PC.BatchCheck          | PASS ✓ — batch proof valid
+  ───────────────────────┼─────────────────────────────────────────────────
+  BSGS Attack on SRS     | τ = 1091160922 recovered in 82.2497 ms  (65536 steps) — BROKEN ✗
+  τ match (Setup vs BSGS) | MISMATCH ✗
+  Forged commit c_fake   | c_fake = (2264640393, 3364118292)  (w'=99)
+  PC.Check (forged)      | PASS ✓ — FORGERY ACCEPTED ✗
+  ───────────────────────┼─────────────────────────────────────────────────
+  Post-quantum safe?     | NO — ECDLP broken by Shor's algorithm
+
+  ATTACK CHAIN SUMMARY:
+
+    1. [PC.Setup]   SRS published. τ = 3238632568 hidden inside SRS[1] = τG.
+    2. [PC.Commit]  Model owner commits: c = 42·G = (3803448500, 1715602834).
+    3. [BSGS]       Attacker runs BSGS on SRS[1] → τ = 1091160922 recovered.
+                    (Shor's does this in O((log n)³) — quantum feasible.)
+    4. [Forgery]    Attacker computes c_fake = 99·G and valid proof π.
+    5. [PC.Check]   Verifier checks forged proof → PASS.
+                    Artemis integrity guarantee BROKEN.
+
+  ROOT CAUSE:
+    KZG commitment c = g(τ)·G leaks group structure.
+    ECDLP protects τ classically (O(√n)) but NOT against Shor's (O((log n)³)).
+    Three ECC components in Artemis all share this single weakness:
+      1. SRS generation   → τ recoverable from τG via Shor's
+      2. Commitment       → w recoverable from w·G via Shor's
+      3. Verifying key    → pairing-based (BN254), also Shor's-vulnerable
+
+  PROPOSED FIX (Part 2 Demo):
+    Replace c = w·G  with  c = SHA256(w ∥ nonce).
+    BSGS/Shor's require cyclic group structure — hash output has none.
+
+  ══════════════════════  END PART 1 DEMO  ═══════════════════════
+
+  ══════════════════════════════════════════════════════════════════
+  ═                                                                ═
+  ═   PART 1 DEMO COMPLETE                                     ═
+  ═   Session A (Setup)    :    0.32 ms                        ═
+  ═   Session B (Commit)   :    0.15 ms                        ═
+  ═   Session C (Open/Chk) :    0.05 ms                        ═
+  ═   Session D (BSGS)     :   82.38 ms  ← attack time          ═
+  ═   Session E (Forgery)  :    0.10 ms                        ═
+  ═   Session F (Batch)    :    0.26 ms                        ═
+  ═   Total runtime        :   83.33 ms                        ═
+  ═   Output saved: results/part1_32bit_output.txt            ═
+  ═                                                                ═
+  ══════════════════════════════════════════════════════════════════
+

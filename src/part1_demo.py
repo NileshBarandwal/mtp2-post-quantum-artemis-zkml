@@ -53,8 +53,15 @@ from kzg_pc_full import (
 # Output file setup (mirrors demo.py pattern)
 # ─────────────────────────────────────────────────────────────────────────────
 
+if _CURVE_BITS == 9:
+    _OUTPUT_FILE = "part1_9bit_output.txt"
+elif _CURVE_BITS == 64:
+    _OUTPUT_FILE = "part1_64bit_output.txt"
+else:
+    _OUTPUT_FILE = "part1_32bit_output.txt"
+
 _OUTPUT_PATH = os.path.normpath(
-    os.path.join(_SCRIPT_DIR, "..", "results", "part1_output.txt")
+    os.path.join(_SCRIPT_DIR, "..", "results", _OUTPUT_FILE)
 )
 
 
@@ -649,7 +656,8 @@ def main():
         print(f"  ═   Session E (Forgery)  :  {t_e*1000:6.2f} ms                        ═")
         print(f"  ═   Session F (Batch)    :  {t_f*1000:6.2f} ms                        ═")
         print(f"  ═   Total runtime        :  {t_total*1000:6.2f} ms                        ═")
-        print(f"  ═   Output saved: results/part1_output.txt                  ═")
+        _out_label = f"Output saved: results/{_OUTPUT_FILE}"
+        print("  ═   " + _out_label.ljust(56) + "═")
         print("  ═" + " " * 64 + "═")
         print("  " + "═" * 66)
         print()

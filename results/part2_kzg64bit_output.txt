@@ -1,0 +1,626 @@
+
+  ══════════════════════════════════════════════════════════════════
+  ═                                                                ═
+  ═   PART 2 DEMO: FRI Hash-based Polynomial Commitment       ═
+  ═   Post-Quantum Security for Artemis zkML                  ═
+  ═   Author : Nilesh R. Barandwal, IIT Dharwad               ═
+  ═   Date   : March 2026                                     ═
+  ═                                                                ═
+  ═   Reference: Lycklama et al. arXiv:2409.12055             ═
+  ═              Definition 2.2 — PC = (Setup, Commit,        ═
+  ═              Verify, Open, Check, BatchOpen, BatchCheck)  ═
+  ═                                                                ═
+  ═   SESSION A — PC.Setup (D=5, no τ, no SRS)               ═
+  ═   SESSION B — PC.Commit (NN weight w=42)                 ═
+  ═   SESSION C — PC.Open + PC.Check (completeness)          ═
+  ═   SESSION D — BSGS attack attempted on FRI root          ═
+  ═   SESSION E — Forgery attempt (rejected by hash)         ═
+  ═   SESSION F — BatchOpen + BatchCheck (3 points)          ═
+  ═   SESSION G — Comprehensive Summary Tables               ═
+  ═   SESSION H — Real-Time KZG vs FRI Comparison (live)    ═
+  ═                                                                ═
+  ═   FRI security: 128-bit post-quantum (Grover on SHA-256) ═
+  ═   KZG security: 0 bits (ECDLP broken by Shor's alg.)    ═
+  ═                                                                ═
+  ══════════════════════════════════════════════════════════════════
+
+
+  ██████████████████████████████████████████████████████████████████
+  █          SESSION A — PC.Setup  [Definition 2.2, Op 1]          █
+  ██████████████████████████████████████████████████████████████████
+
+  OBJECTIVE: Generate commitment key ck for FRI-style scheme.
+  Unlike KZG, there is NO secret τ, NO SRS, NO trusted setup.
+
+  ── Contrast with Part 1 (KZG) ──────────────────────────────────
+    KZG Part 1: τ = 499,  SRS = [G, τG, τ²G, ..., τ⁵G] (6 ECC points)
+                Trusted setup required. τ is toxic waste.
+                BSGS recovered τ = 499 from SRS[1] = τG in 0.0479 ms.
+
+    FRI Part 2: No secret. No SRS. No ceremony.
+                Public nonce only. Setup = os.urandom(16).
+
+
+==================================================================
+  PC.Setup  [FRI-style Hash-based — Definition 2.2, Op 1]
+==================================================================
+  Degree bound     :  D = 5
+  Domain           :  xs = [0, 1, 2, 3, 4, 5, 6]
+  Domain size      :  D+2 = 7  points
+  Hash function    :  SHA-256 (Poseidon in production)
+  Nonce            :  4ed4fef9541b82ec7e8319ad01affdd8  (public random, 16 bytes)
+  Nonce size       :  16 bytes
+
+  Setup time       :  4.08 µs
+
+  ┌─────────────────────────────────────────────────────────┐
+  │  No secret trapdoor. No trusted setup. No toxic waste.  │
+  │  No SRS to generate. No ceremony required.              │
+  │  Security rests on SHA-256 collision resistance only.   │
+  └─────────────────────────────────────────────────────────┘
+==================================================================
+
+  ────────────────────────────────────────────────────────────────
+  SESSION A RESULT:
+    Scheme         :  FRI-style Hash-based Commitment
+    Degree bound   :  D = 5
+    Domain         :  xs = [0, 1, 2, 3, 4, 5, 6]
+    Nonce          :  4ed4fef9541b82ec7e8319ad01affdd8  (16 bytes, public)
+    Secret τ       :  NONE — no trapdoor exists
+    SRS            :  NONE — no trusted setup required
+    Setup time     :  4.08 µs
+
+    [KZG Part 1]   τ = 499,  SRS generated,  trusted setup required
+    [FRI Part 2]   No secret. No SRS. No ceremony.
+
+  ██████████████████████████████████████████████████████████████████
+  █         SESSION B — PC.Commit  [Definition 2.2, Op 2]          █
+  ██████████████████████████████████████████████████████████████████
+
+  OBJECTIVE: Commit to neural network weight w = 42.
+  Same weight as Part 1 — to allow direct comparison.
+
+  Model context:
+    Neural network  :  y = w·x + b  (single neuron)
+    Weight          :  w = 42  (PRIVATE — this is what we commit to)
+    Polynomial      :  g(X) = 42  (constant polynomial, degree 0)
+    Coefficients    :  [42]
+
+  FRI commitment strategy:
+    Evaluate g at all domain points → [42, 42, 42, 42, 42, 42, 42]
+    Hash each value with nonce → 7 leaf hashes
+    Build Merkle tree → 32-byte root is the commitment
+
+
+──────────────────────────────────────────────────────────────────
+  PC.Commit  [FRI — Merkle commitment to polynomial evaluations]
+──────────────────────────────────────────────────────────────────
+  Polynomial g   :  g(X) = 42  (degree 0)
+  Coefficients   :  [42]
+  Domain         :  xs = [0, 1, 2, 3, 4, 5, 6]
+
+  Step 1 — Evaluate g at all domain points:
+    g(0) = 42
+    g(1) = 42
+    g(2) = 42
+    g(3) = 42
+    g(4) = 42
+    g(5) = 42
+    g(6) = 42
+
+  Step 2 — Hash each evaluation:
+    leaf[i] = SHA256(str(g(xᵢ)).encode() ‖ nonce)
+    leaf[0] = SHA256('42' ‖ nonce) = 8f6aaaf1cb5ab3dcbd33a566ba7f137a...
+    leaf[1] = SHA256('42' ‖ nonce) = 8f6aaaf1cb5ab3dcbd33a566ba7f137a...
+    leaf[2] = SHA256('42' ‖ nonce) = 8f6aaaf1cb5ab3dcbd33a566ba7f137a...
+    leaf[3] = SHA256('42' ‖ nonce) = 8f6aaaf1cb5ab3dcbd33a566ba7f137a...
+    leaf[4] = SHA256('42' ‖ nonce) = 8f6aaaf1cb5ab3dcbd33a566ba7f137a...
+    leaf[5] = SHA256('42' ‖ nonce) = 8f6aaaf1cb5ab3dcbd33a566ba7f137a...
+    leaf[6] = SHA256('42' ‖ nonce) = 8f6aaaf1cb5ab3dcbd33a566ba7f137a...
+
+  Step 3 — Build Merkle tree:
+    Padded leaf count : 8  (next power of 2 ≥ 7)
+    Number of levels  : 3
+
+    ── Leaf level (level 3, 8 nodes) ──
+      [ 0] = 8f6aaaf1cb5ab3dcbd33a566ba7f137ae167f3823aae734c...  [real]
+      [ 1] = 8f6aaaf1cb5ab3dcbd33a566ba7f137ae167f3823aae734c...  [real]
+      [ 2] = 8f6aaaf1cb5ab3dcbd33a566ba7f137ae167f3823aae734c...  [real]
+      [ 3] = 8f6aaaf1cb5ab3dcbd33a566ba7f137ae167f3823aae734c...  [real]
+      [ 4] = 8f6aaaf1cb5ab3dcbd33a566ba7f137ae167f3823aae734c...  [real]
+      [ 5] = 8f6aaaf1cb5ab3dcbd33a566ba7f137ae167f3823aae734c...  [real]
+      [ 6] = 8f6aaaf1cb5ab3dcbd33a566ba7f137ae167f3823aae734c...  [real]
+      [ 7] = 000000000000000000000000000000000000000000000000...  [padding]
+    ── Level 2 (4 nodes) ──
+      [ 4] = 88593c54a7bc40c99ea138b2b635a9dfe0a0c8865d59f6bd...
+      [ 5] = 88593c54a7bc40c99ea138b2b635a9dfe0a0c8865d59f6bd...
+      [ 6] = 88593c54a7bc40c99ea138b2b635a9dfe0a0c8865d59f6bd...
+      [ 7] = 4aadb43396dbcc28cc1d1f520feb0891775c99475aeb7955...
+    ── Level 1 (2 nodes) ──
+      [ 2] = a297c15d2a96845fc0e4752dec1bf9312767b95ad7bab9b7...
+      [ 3] = 7346d18bd37f26b3a84dedb2f92d5f933181c1e4e934368a...
+    ── Root (level 0) ──
+      root = 8088778312714cb3b081e0dfe4e3203d58937a5c6e47c2a873a0555e24c109aa
+
+  Commitment root  :  8088778312714cb3b081e0dfe4e3203d58937a5c6e47c2a873a0555e24c109aa
+  Root size        :  32 bytes  (SHA-256 output, fixed)
+  Commit time      :  23.08 µs
+  Proof size (open):  3 × 32 = 96 bytes  (Merkle path)
+──────────────────────────────────────────────────────────────────
+
+──────────────────────────────────────────────────────────────────
+  PC.Verify  [Recompute and compare Merkle root]
+──────────────────────────────────────────────────────────────────
+  Recomputed root  :  8088778312714cb3b081e0dfe4e3203d58937a5c6e47c2a873a0555e24c109aa
+  Committed root   :  8088778312714cb3b081e0dfe4e3203d58937a5c6e47c2a873a0555e24c109aa
+  Match            :  True
+  PC.Verify        :  1  ← VALID ✓
+  Verify time      :  9.75 µs
+──────────────────────────────────────────────────────────────────
+
+  ────────────────────────────────────────────────────────────────
+  SESSION B RESULT:
+    Polynomial     :  g(X) = 42  (encodes weight w=42)
+    Commitment root:  8088778312714cb3b081e0dfe4e3203d58937a5c6e47c2a873a0555e24c109aa
+    Root size      :  32 bytes  (SHA-256 output)
+    PC.Verify      :  1  ✓
+    Commit time    :  23.08 µs
+    Verify time    :  9.75 µs
+
+    KZG commitment :  64 bytes (ECC point, e.g. (1019, 920) at production scale)
+    FRI commitment :  32 bytes (hash root) — SMALLER and POST-QUANTUM SECURE
+
+  ██████████████████████████████████████████████████████████████████
+  █  SESSION C — PC.Open + PC.Check  [Definition 2.2, Ops 4 & 5]   █
+  ██████████████████████████████████████████████████████████████████
+
+  OBJECTIVE: Demonstrate COMPLETENESS of the FRI scheme.
+  An honest prover opens g(X)=42 at x=3.  Verifier should accept.
+
+  For constant polynomial g(X) = 42:
+    g(3) = 42  (constant — evaluates to 42 everywhere)
+    Proof = Merkle authentication path for leaf at index 3
+
+  ── PC.Open ──────────────────────────────────────────────────────
+
+──────────────────────────────────────────────────────────────────
+  PC.Open  [Merkle evaluation proof at point x]
+──────────────────────────────────────────────────────────────────
+  Domain index   :  x = 3  (domain point xs[3] = 3)
+  Evaluation     :  y = g(3) = 42
+  Merkle path    :  3 sibling hashes
+    path[0] = 8f6aaaf1cb5ab3dcbd33a566ba7f137ae167f3823aae734c9211f4c095a6d5ef
+    path[1] = 88593c54a7bc40c99ea138b2b635a9dfe0a0c8865d59f6bd6b42a810bbcc8671
+    path[2] = 7346d18bd37f26b3a84dedb2f92d5f933181c1e4e934368a3de34526fb29d80a
+
+  Proof size     :  3 × 32 = 96 bytes
+  Open time      :  1.50 µs
+──────────────────────────────────────────────────────────────────
+
+  ── PC.Check (honest proof) ──────────────────────────────────────
+
+──────────────────────────────────────────────────────────────────
+  PC.Check  [Walk Merkle path from leaf to root]
+──────────────────────────────────────────────────────────────────
+  Claimed y       :  42
+  Leaf hash       :  SHA256('42' ‖ nonce) = 8f6aaaf1cb5ab3dcbd33a566ba7f137ae167f3823aae734c9211f4c095a6d5ef
+  Merkle path     :  3 sibling hashes
+
+  Walking Merkle path:
+    Step 1: pos=3 (right child)
+             sibling  = 8f6aaaf1cb5ab3dcbd33a566ba7f137ae167f3823aae734c9211f4c095a6d5ef
+             parent   = SHA256(sibling ‖ current)
+             result   = 88593c54a7bc40c99ea138b2b635a9dfe0a0c8865d59f6bd6b42a810bbcc8671
+    Step 2: pos=1 (right child)
+             sibling  = 88593c54a7bc40c99ea138b2b635a9dfe0a0c8865d59f6bd6b42a810bbcc8671
+             parent   = SHA256(sibling ‖ current)
+             result   = a297c15d2a96845fc0e4752dec1bf9312767b95ad7bab9b7ea13d2004f53c8ed
+    Step 3: pos=0 (left child)
+             sibling  = 7346d18bd37f26b3a84dedb2f92d5f933181c1e4e934368a3de34526fb29d80a
+             parent   = SHA256(current ‖ sibling)
+             result   = 8088778312714cb3b081e0dfe4e3203d58937a5c6e47c2a873a0555e24c109aa
+
+  Computed root   :  8088778312714cb3b081e0dfe4e3203d58937a5c6e47c2a873a0555e24c109aa
+  Expected root   :  8088778312714cb3b081e0dfe4e3203d58937a5c6e47c2a873a0555e24c109aa
+  Match           :  True
+  PC.Check        :  1  ← VALID ✓
+  Check time      :  13.54 µs
+──────────────────────────────────────────────────────────────────
+
+  ────────────────────────────────────────────────────────────────
+  SESSION C RESULT:
+    Eval index     :  x = 3  (domain point xs[3] = 3)
+    Claimed value  :  y = g(3) = 42
+    Proof path     :  3 hashes  (96 bytes)
+    PC.Check       :  PASS ✓ — completeness holds
+    Open time      :  1.50 µs
+    Check time     :  13.54 µs
+    Proof size     :  96 bytes  (3 × 32)
+
+    KZG proof      :  ECC point, 64 bytes (production scale)
+    FRI proof      :  Merkle path, 96 bytes  (3 × 32 bytes)
+
+  ██████████████████████████████████████████████████████████████████
+  █      SESSION D — BSGS Attack Attempted on FRI Commitment       █
+  ██████████████████████████████████████████████████████████████████
+
+  OBJECTIVE: Show WHY BSGS cannot work against FRI/hash commitment.
+
+  What the attacker sees:
+    FRI root = 8088778312714cb3b081e0dfe4e3203d58937a5c6e47c2a873a0555e24c109aa
+    (32-byte SHA-256 hash — public)
+
+  ── WHY BSGS FAILS ───────────────────────────────────────────────
+
+    BSGS requires target Q = w·G  (an ECC point in a cyclic group).
+    FRI root = SHA256(hash) — NOT an ECC point, NO group structure.
+
+    For BSGS to work, we need:
+      1. A cyclic group with generator G
+      2. A target Q that satisfies Q = w·G  for some scalar w
+      3. Group law to compute baby steps i·G and giant steps Q - j·(m·G)
+
+    The FRI Merkle root provides NONE of these:
+      - No generator G to compute multiples of
+      - Root is bytes, not a group element
+      - No group law: SHA256(root + something) ≠ (w+1)·G
+      - No discrete logarithm problem exists for hash outputs
+
+  ── BSGS Attempt  (m = ⌈√502⌉ = 23,  same as Part 1) ─────────
+
+  Calling bsgs(Q=root, G=(0, 989), n=502, curve=ECC) ...
+  (root is 32 bytes, not a curve point)
+
+  BSGS FAILED with ValueError: too many values to unpack (expected 2)
+
+  Explanation:
+    curve.point_add(root_bytes, neg_mG) attempted to unpack
+    root (32 bytes) as an (x, y) ECC coordinate pair.
+    32 bytes cannot be unpacked into 2 values — TypeError/ValueError.
+    Attack cannot proceed: no group law on hash output.
+
+  RESULT: BSGS FAILED — no group structure in SHA-256 output.
+  Attack time     : 0.0236 ms  → FAILED
+
+  ── BRUTE FORCE COST ANALYSIS ────────────────────────────────────
+
+    SHA-256 preimage requires 2^256 hash evaluations (classical).
+    Grover's algorithm (quantum) reduces this to 2^128.
+    Amy et al., SAC 2016: actual quantum cost ≈ 2^166 including overhead.
+    2^128 evaluations is computationally infeasible with any foreseeable
+    quantum hardware — far beyond Shor's O((log n)³) for ECDLP.
+
+  ── POST-QUANTUM SECURITY SUMMARY ────────────────────────────────
+
+    KZG (Part 1): ECDLP broken by Shor's in O((log n)³) quantum ops.
+    FRI (Part 2): SHA-256 security = 2^128 under Grover — INFEASIBLE.
+
+    BSGS applicable  : NO  (no cyclic group structure)
+    Shor's applicable: NO  (no periodic group to find periods in)
+    Grover's cost    : 2^128  (infeasible)
+    Trusted setup    : NOT REQUIRED
+
+  ────────────────────────────────────────────────────────────────
+  SESSION D RESULT:
+    Attack type    :  BSGS (classical analogue of Shor's)
+    Target         :  FRI Merkle root  (32 bytes, SHA-256 hash)
+    Attack time    :  0.0236 ms
+    Attack outcome :  FAILED — no group structure in hash output
+    Reason         :  BSGS requires Q = w·G; hash root ≠ ECC point
+    Shor's outcome :  FAILED — hash functions have no cyclic group
+    PQ security    :  128 bits (Grover on SHA-256)
+
+  ██████████████████████████████████████████████████████████████████
+  █    SESSION E — Forgery Attempt  [Hash Collision Resistance]    █
+  ██████████████████████████████████████████████████████████████████
+
+  OBJECTIVE: Show that FRI commitment resists forgery.
+  Attacker tries to claim g(3) = 99  (not the real w=42).
+
+  ── Step 1: Attacker computes fake leaf ──────────────────────────
+
+    Real leaf at x=3: SHA256('42' ‖ nonce)
+    real_leaf = 8f6aaaf1cb5ab3dcbd33a566ba7f137ae167f3823aae734c9211f4c095a6d5ef
+
+    Fake leaf at x=3: SHA256('99' ‖ nonce)
+    fake_leaf = 8d9e1e5b9ffb3929844c57df453746a19cd73a6b5ce904a56764a1be833b3194
+
+    real_leaf == fake_leaf? False
+    (Different inputs → different outputs by SHA-256 collision resistance)
+
+  ── Step 2: Attacker tries to build a fake Merkle root ───────────
+
+    The attacker uses the REAL Merkle path (public, from the proof)
+    but substitutes the fake leaf for the real leaf.
+    If successful, they would claim g(3) = 99 with the real root.
+
+    real_root (committed)     : 8088778312714cb3b081e0dfe4e3203d58937a5c6e47c2a873a0555e24c109aa
+    fake_root (from fake leaf): 6fa108aed81928d071b0d97528b13639b0b8243de026491fd5439d55818d5413
+    Same root?                : False
+
+    The fake leaf propagates a DIFFERENT hash up the tree.
+    fake_root ≠ real_root — the forgery is DETECTED.
+
+  ── Step 3: PC.Check on fake opening (y=99 against real root) ────
+
+
+──────────────────────────────────────────────────────────────────
+  PC.Check  [Walk Merkle path from leaf to root]
+──────────────────────────────────────────────────────────────────
+  Claimed y       :  99
+  Leaf hash       :  SHA256('99' ‖ nonce) = 8d9e1e5b9ffb3929844c57df453746a19cd73a6b5ce904a56764a1be833b3194
+  Merkle path     :  3 sibling hashes
+
+  Walking Merkle path:
+    Step 1: pos=3 (right child)
+             sibling  = 8f6aaaf1cb5ab3dcbd33a566ba7f137ae167f3823aae734c9211f4c095a6d5ef
+             parent   = SHA256(sibling ‖ current)
+             result   = b6a980498374e3a0db85fa52ab627a69976a9cd01e94f0a746fe8d40220af68f
+    Step 2: pos=1 (right child)
+             sibling  = 88593c54a7bc40c99ea138b2b635a9dfe0a0c8865d59f6bd6b42a810bbcc8671
+             parent   = SHA256(sibling ‖ current)
+             result   = 32c239cd5107bb89cbbb98726dec21412630473bee52807f79b4133b3e169a91
+    Step 3: pos=0 (left child)
+             sibling  = 7346d18bd37f26b3a84dedb2f92d5f933181c1e4e934368a3de34526fb29d80a
+             parent   = SHA256(current ‖ sibling)
+             result   = 6fa108aed81928d071b0d97528b13639b0b8243de026491fd5439d55818d5413
+
+  Computed root   :  6fa108aed81928d071b0d97528b13639b0b8243de026491fd5439d55818d5413
+  Expected root   :  8088778312714cb3b081e0dfe4e3203d58937a5c6e47c2a873a0555e24c109aa
+  Match           :  False
+  PC.Check        :  0  ← INVALID ✗
+  Check time      :  11.92 µs
+──────────────────────────────────────────────────────────────────
+
+  ────────────────────────────────────────────────────────────────
+  SESSION E RESULT:
+    Real commitment root   :  8088778312714cb3b081e0dfe4e3203d58937a5c6e47c2a873a0555e24c109aa
+    Fake leaf (y=99)   :  8d9e1e5b9ffb3929844c57df453746a19cd73a6b5ce904a56764a1be833b3194
+    Fake computed root     :  6fa108aed81928d071b0d97528b13639b0b8243de026491fd5439d55818d5413
+    Roots match            :  False  ← DIFFERENT
+    PC.Check (fake y=99) :  0  ← FORGERY REJECTED — SECURE ✓
+    Forge attempt time     :  11.92 µs
+
+    [KZG Part 1]  c_fake = 99·G  PASSED PC.Check  (broken — group homomorphism)
+    [FRI Part 2]  fake root       REJECTED by PC.Check  (secure — hash collision)
+
+  ██████████████████████████████████████████████████████████████████
+  █SESSION F — BatchOpen + BatchCheck  [Definition 2.2, Ops 6 & 7] █
+  ██████████████████████████████████████████████████████████████████
+
+  OBJECTIVE: Demonstrate batched multi-point opening over FRI.
+  Polynomial g(X) = 1 + 2X + 3X² opened at three points simultaneously.
+
+  Polynomial     :  g(X) = 1 + 2X + 3X²  (degree 2)
+  Evaluations    :
+    g(1) = 6
+    g(2) = 17
+    g(4) = 57
+
+  ── PC.Commit ────────────────────────────────────────────────────
+
+──────────────────────────────────────────────────────────────────
+  PC.Commit  [FRI — Merkle commitment to polynomial evaluations]
+──────────────────────────────────────────────────────────────────
+  Polynomial g   :  g(X) = 1 + 2X + 3X^2  (degree 2)
+  Coefficients   :  [1, 2, 3]
+  Domain         :  xs = [0, 1, 2, 3, 4, 5, 6]
+
+  Step 1 — Evaluate g at all domain points:
+    g(0) = 1
+    g(1) = 6
+    g(2) = 17
+    g(3) = 34
+    g(4) = 57
+    g(5) = 86
+    g(6) = 121
+
+  Step 2 — Hash each evaluation:
+    leaf[i] = SHA256(str(g(xᵢ)).encode() ‖ nonce)
+    leaf[0] = SHA256('1' ‖ nonce) = 3ca7a4b400295a032c9c641b2a854eed...
+    leaf[1] = SHA256('6' ‖ nonce) = 798d428121259a42d787dd2b33418a27...
+    leaf[2] = SHA256('17' ‖ nonce) = 088a3d6ac9d4d6db175adeab4b49499a...
+    leaf[3] = SHA256('34' ‖ nonce) = 2d5b24895e0e0c696ee98fdc9359f27c...
+    leaf[4] = SHA256('57' ‖ nonce) = d3253a794bd6a8e3aea404a951da5126...
+    leaf[5] = SHA256('86' ‖ nonce) = 80922bd7ea28034d34318b4fbeb286c1...
+    leaf[6] = SHA256('121' ‖ nonce) = 122e3aa0318fd27656a47a724c592cae...
+
+  Step 3 — Build Merkle tree:
+    Padded leaf count : 8  (next power of 2 ≥ 7)
+    Number of levels  : 3
+
+    ── Leaf level (level 3, 8 nodes) ──
+      [ 0] = 3ca7a4b400295a032c9c641b2a854eed363d50254a6fae05...  [real]
+      [ 1] = 798d428121259a42d787dd2b33418a278e2b7274f0f05cc9...  [real]
+      [ 2] = 088a3d6ac9d4d6db175adeab4b49499a6edf4c07c4bfb6cd...  [real]
+      [ 3] = 2d5b24895e0e0c696ee98fdc9359f27ccb0d8924882e614b...  [real]
+      [ 4] = d3253a794bd6a8e3aea404a951da5126eef6f5a790c14246...  [real]
+      [ 5] = 80922bd7ea28034d34318b4fbeb286c14443d02f95525623...  [real]
+      [ 6] = 122e3aa0318fd27656a47a724c592cae73e9c801f0e41aec...  [real]
+      [ 7] = 000000000000000000000000000000000000000000000000...  [padding]
+    ── Level 2 (4 nodes) ──
+      [ 4] = cc1d9254d194933ff5f458ca3bf6bbb129e6ffc77af48b13...
+      [ 5] = 4313cbb1471c49796b3c42fd0e3cbf5598c8125462424289...
+      [ 6] = 563e4a70344afc439f1b29c5827ac54ec8dea93ae22b42e6...
+      [ 7] = 687986b3a9f1e7156fc80a39c2494d70401ae730497d5453...
+    ── Level 1 (2 nodes) ──
+      [ 2] = 7f37170dfe2dd2212eff3a11268f27e9ca35632d661fe917...
+      [ 3] = 28a0def779a329fedaf26c102644e0d0171c97aa75562046...
+    ── Root (level 0) ──
+      root = 2d0f2ffd50ae6fbbae65edbd7e8684ab4a36503a0021399600a8e0ded75222fe
+
+  Commitment root  :  2d0f2ffd50ae6fbbae65edbd7e8684ab4a36503a0021399600a8e0ded75222fe
+  Root size        :  32 bytes  (SHA-256 output, fixed)
+  Commit time      :  8.62 µs
+  Proof size (open):  3 × 32 = 96 bytes  (Merkle path)
+──────────────────────────────────────────────────────────────────
+
+  ── PC.Verify ────────────────────────────────────────────────────
+
+──────────────────────────────────────────────────────────────────
+  PC.Verify  [Recompute and compare Merkle root]
+──────────────────────────────────────────────────────────────────
+  Recomputed root  :  2d0f2ffd50ae6fbbae65edbd7e8684ab4a36503a0021399600a8e0ded75222fe
+  Committed root   :  2d0f2ffd50ae6fbbae65edbd7e8684ab4a36503a0021399600a8e0ded75222fe
+  Match            :  True
+  PC.Verify        :  1  ← VALID ✓
+  Verify time      :  7.79 µs
+──────────────────────────────────────────────────────────────────
+
+  ── PC.BatchOpen ─────────────────────────────────────────────────
+
+──────────────────────────────────────────────────────────────────
+  PC.BatchOpen  [Multiple evaluation proofs simultaneously]
+──────────────────────────────────────────────────────────────────
+  Opening at indices : [1, 2, 4]
+  Domain points      : [1, 2, 4]
+
+  ── x = 1 (index 1) ──
+    y = g(1) = 6
+    Merkle path (3 hashes, 96 bytes):
+      path[0] = 3ca7a4b400295a032c9c641b2a854eed363d50254a6fae05df8cbf1b37a17386
+      path[1] = 4313cbb1471c49796b3c42fd0e3cbf5598c81254624242894d83c108cd5ddcaf
+      path[2] = 28a0def779a329fedaf26c102644e0d0171c97aa75562046cff17cfe67cfa871
+  ── x = 2 (index 2) ──
+    y = g(2) = 17
+    Merkle path (3 hashes, 96 bytes):
+      path[0] = 2d5b24895e0e0c696ee98fdc9359f27ccb0d8924882e614b4f7cb75b44b85469
+      path[1] = cc1d9254d194933ff5f458ca3bf6bbb129e6ffc77af48b1300ae16bc5583d441
+      path[2] = 28a0def779a329fedaf26c102644e0d0171c97aa75562046cff17cfe67cfa871
+  ── x = 4 (index 4) ──
+    y = g(4) = 57
+    Merkle path (3 hashes, 96 bytes):
+      path[0] = 80922bd7ea28034d34318b4fbeb286c14443d02f955256238f1b7a8dfabcb7e5
+      path[1] = 687986b3a9f1e7156fc80a39c2494d70401ae730497d5453bc622f6e51cbc78c
+      path[2] = 7f37170dfe2dd2212eff3a11268f27e9ca35632d661fe91794a94f82a5f9e2a3
+
+  Total batch proof size :  288 bytes  (3 openings × 96 bytes each)
+  BatchOpen time         :  13.29 µs
+──────────────────────────────────────────────────────────────────
+
+  ── PC.BatchCheck ────────────────────────────────────────────────
+
+──────────────────────────────────────────────────────────────────
+  PC.BatchCheck  [Verify all batch evaluation proofs]
+──────────────────────────────────────────────────────────────────
+  x= 1 (idx 1), y=   6: PASS ✓   root = 2d0f2ffd50ae6fbbae65edbd7e8684ab...
+  x= 2 (idx 2), y=  17: PASS ✓   root = 2d0f2ffd50ae6fbbae65edbd7e8684ab...
+  x= 4 (idx 4), y=  57: PASS ✓   root = 2d0f2ffd50ae6fbbae65edbd7e8684ab...
+
+  BatchCheck result  :  1  ← ALL PROOFS VALID ✓
+  BatchCheck time    :  12.04 µs
+──────────────────────────────────────────────────────────────────
+
+  ────────────────────────────────────────────────────────────────
+  SESSION F RESULT:
+    Polynomial     :  g(X) = 1 + 2X + 3X²
+    Commitment     :  2d0f2ffd50ae6fbbae65edbd7e8684ab4a36503a0021399600a8e0ded75222fe
+    Eval points    :  [1, 2, 4]  (domain points [1, 2, 4])
+    Evaluations    :  [6, 17, 57]
+    Total proof    :  288 bytes
+    BatchCheck     :  1  ← ALL BATCH PROOFS VALID ✓
+    BatchOpen time :  13.29 µs
+    BatchCheck time:  12.04 µs
+    Batch proof sz :  288 bytes  (3 Merkle paths)
+
+  ██████████████████████████████████████████████████████████████████
+  █    SESSION G — Comprehensive Summary Table  [Thesis Output]    █
+  ██████████████████████████████████████████████████████████████████
+
+  PART 2 DEMO — FRI Hash-based Polynomial Commitment Scheme
+  Definition 2.2, Lycklama et al. arXiv:2409.12055
+
+  ══════════════════════════════════════════════════════════════════════
+  TABLE 1: Performance Comparison
+  ══════════════════════════════════════════════════════════════════════
+  Parameter                  | KZG (Part 1)             | FRI+Poseidon (Part 2)
+  ───────────────────────────┼──────────────────────────┼─────────────────────────────
+  PC.Setup time              | 70.04 µs                 | 4.08 µs
+  PC.Commit time             | ~70 µs (0.07 ms)         | 23.08 µs
+  PC.Verify time             | ~70 µs (est.)            | 9.75 µs
+  PC.Open time               | < 0.1 ms (est.)          | 1.50 µs
+  PC.Check (honest)          | < 0.1 ms (est.)          | 13.54 µs
+  PC.Check (forged)          | PASS — forgery accepted  | 11.92 µs — REJECTED
+  PC.BatchOpen time          | < 0.1 ms (est.)          | 13.29 µs
+  PC.BatchCheck time         | < 0.1 ms (est.)          | 12.04 µs
+  ───────────────────────────┼──────────────────────────┼─────────────────────────────
+  Commitment size            | 64 bytes (ECC point)     | 32 bytes (hash root)
+  Single proof size          | 64 bytes (ECC point)     | 96 bytes (3 × 32)
+  Batch proof size           | 64 bytes (1 ECC point)   | 288 bytes (3 Merkle paths)
+  Nonce size                 | N/A                      | 16 bytes (public random)
+  ───────────────────────────┼──────────────────────────┼─────────────────────────────
+  Merkle levels              | N/A                      | 3 levels (domain size 7)
+  Evaluation domain          | No domain (τ-based)      | 7 points (xs = [0..6])
+  Trusted setup              | REQUIRED (ceremony)      | ELIMINATED
+  Post-quantum security      | 0 bits (Shor's breaks ECDLP) | 128 bits (Grover on SHA-256)
+  ───────────────────────────┼──────────────────────────┼─────────────────────────────
+
+  ══════════════════════════════════════════════════════════════════════
+  TABLE 2: Security Comparison
+  ══════════════════════════════════════════════════════════════════════
+  Attack                     | KZG (Part 1)             | FRI+Poseidon (Part 2)
+  ───────────────────────────┼──────────────────────────┼─────────────────────────────
+  BSGS attack                | τ recovered in 0.0479 ms | FAILS — no group structure
+  Shor's (quantum)           | O((log n)³) — FEASIBLE   | No group → no attack
+  Forgery (constant poly)    | ACCEPTED (broken)        | REJECTED (secure)
+  Grover's (quantum)         | N/A                      | 2^128 cost — infeasible
+  Secret trapdoor leak       | Breaks ALL proofs        | No secret to leak
+  Collision attack           | N/A (no hash)            | 2^128 (SHA-256)
+  Preimage (classical)       | N/A                      | 2^256 (SHA-256)
+  Preimage (Grover)          | N/A                      | 2^128 (Amy et al. 2^166)
+  ───────────────────────────┼──────────────────────────┼─────────────────────────────
+
+  ══════════════════════════════════════════════════════════════════════
+  SECURITY PARAMETERS (FRI+SHA-256 Prototype)
+  ══════════════════════════════════════════════════════════════════════
+  Hash function           :  SHA-256 (prototype) / Poseidon (production)
+  Post-quantum level      :  128 bits (Grover's algorithm on SHA-256)
+  Classical preimage cost :  2^256 hash evaluations
+  Quantum preimage cost   :  2^128  (Grover) / 2^166 (Amy et al. SAC 2016)
+  BSGS applicable         :  NO — no cyclic group structure in hash output
+  Shor's applicable       :  NO — hash functions have no period to find
+  Trusted setup required  :  NO — no secret trapdoor τ exists
+  Commitment size         :  32 bytes (SHA-256 output, fixed)
+  Merkle levels           :  3 levels (log₂(7 padded = 8))
+  Evaluation domain size  :  7 points (D+2 = 5+2)
+  Nonce size              :  16 bytes
+
+  ══════════════════════════════════════════════════════════════════════
+  ATTACK CHAIN FOR FRI — WHY IT IS SECURE
+  ══════════════════════════════════════════════════════════════════════
+
+    1. Attacker sees Merkle root = 32-byte hash value  (public)
+    2. No generator G, no group law, no cyclic structure in hash output
+    3. BSGS: requires Q = w·G — root is NOT an ECC point → FAILS
+    4. Shor's: finds periods in cyclic groups — hash has no group → FAILS
+    5. Forgery: SHA256(99 ‖ nonce) ≠ SHA256(42 ‖ nonce) by collision resistance
+    6. Preimage: costs 2^128 under Grover — computationally infeasible
+    7. Conclusion: ALL three ECC dependencies from Artemis are ELIMINATED
+
+  ══════════════════════════════════════════════════════════════════════
+  THREE ARTEMIS ECC DEPENDENCIES — STATUS AFTER FRI REPLACEMENT
+  ══════════════════════════════════════════════════════════════════════
+
+    Component 1 — SRS (Structured Reference String):
+      KZG: SRS = [G, τG, τ²G, ..., τᴰG]  → τ recoverable by Shor's
+      FRI: NO SRS — replaced by evaluation domain + public nonce
+           Status: ELIMINATED ✓
+
+    Component 2 — Polynomial Commitment:
+      KZG: c = g(τ)·G  (ECC point, group structure, ECDLP assumption)
+      FRI: root = MerkleRoot(SHA256(g(xᵢ) ‖ nonce))  (hash, no group)
+           Status: ELIMINATED ✓
+
+    Component 3 — Verifying Key (pairing-based):
+      KZG: e(c − y·G, G₂) = e(π, τG₂ − x·G₂)  (BN254 pairing)
+      FRI: Merkle path check: walk SHA256 hashes from leaf to root
+           No bilinear pairing. No BN254. No ECDLP.
+           Status: ELIMINATED ✓
+
+  CONCLUSION: All three quantum attack surfaces in Artemis are removed.
+              FRI+Poseidon commitments provide 128-bit post-quantum security.
+
+  ══════════════════════  END PART 2 DEMO  ═══════════════════════
+
+  ██████████████████████████████████████████████████████████████████
+  █SESSION H — Real-Time Comparison: KZG vs FRI+Poseidon (Same Machine)█

@@ -35,7 +35,6 @@ _SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, _SCRIPT_DIR)
 
 from ecc_utils import EllipticCurve, CURVE_A, CURVE_B, CURVE_P
-import ecc_utils_32bit as _ecc32
 from bsgs_attack import bsgs
 import kzg_pc_full as _kzg
 from fri_commitment import (
@@ -44,13 +43,34 @@ from fri_commitment import (
     poly_eval, _sha256, _walk_merkle_path,
 )
 
+# ── KZG curve selection via --kzg-curve argument (9, 32, 64); default = 32 ──
+_KZG_CURVE_BITS = 32
+for _i, _arg in enumerate(sys.argv):
+    if _arg == "--kzg-curve" and _i + 1 < len(sys.argv):
+        _KZG_CURVE_BITS = int(sys.argv[_i + 1])
+        break
+
+if _KZG_CURVE_BITS == 9:
+    import ecc_utils as _ecc_kzg
+elif _KZG_CURVE_BITS == 64:
+    import ecc_utils_64bit as _ecc_kzg
+else:  # 32 (default)
+    import ecc_utils_32bit as _ecc_kzg
+
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Output file setup (same Tee pattern as part1_demo.py)
 # ─────────────────────────────────────────────────────────────────────────────
 
+if _KZG_CURVE_BITS == 9:
+    _OUTPUT_FILE = "part2_kzg9bit_output.txt"
+elif _KZG_CURVE_BITS == 64:
+    _OUTPUT_FILE = "part2_kzg64bit_output.txt"
+else:
+    _OUTPUT_FILE = "part2_kzg32bit_output.txt"
+
 _OUTPUT_PATH = os.path.normpath(
-    os.path.join(_SCRIPT_DIR, "..", "results", "part2_output.txt")
+    os.path.join(_SCRIPT_DIR, "..", "results", _OUTPUT_FILE)
 )
 
 
@@ -966,10 +986,10 @@ def main():
         G = curve.find_generator()
         n = curve.compute_group_order(G)
 
-        # Build 32-bit curve (used in Session H for live KZG comparison)
-        curve_32 = _ecc32.EllipticCurve(_ecc32.CURVE_A, _ecc32.CURVE_B, _ecc32.CURVE_P)
-        G_32 = curve_32.find_generator()
-        n_32 = curve_32.compute_group_order(G_32)
+        # Build KZG curve for Session H (selected via --kzg-curve, default 32-bit)
+        curve_kzg = _ecc_kzg.EllipticCurve(_ecc_kzg.CURVE_A, _ecc_kzg.CURVE_B, _ecc_kzg.CURVE_P)
+        G_kzg = curve_kzg.find_generator()
+        n_kzg = curve_kzg.compute_group_order(G_kzg)
 
         # ── Session A ─────────────────────────────────────────────────────────
         t0 = time.perf_counter()
@@ -1032,7 +1052,7 @@ def main():
         # ── Session H ─────────────────────────────────────────────────────────
         t0 = time.perf_counter()
         _, kzg_bsgs_ms_h = session_h(
-            curve_32, G_32, n_32,
+            curve_kzg, G_kzg, n_kzg,
             fri_setup_us=setup_us,
             fri_commit_us=commit_us,
             fri_verify_us=verify_us,
@@ -1059,7 +1079,8 @@ def main():
         print(f"  ═   Session F (Batch)         :  {t_f*1000:6.2f} ms                   ═")
         print(f"  ═   Session H (Live compare)  :  {t_h*1000:6.2f} ms                   ═")
         print(f"  ═   Total runtime             :  {t_total*1000:6.2f} ms                   ═")
-        print(f"  ═   Output saved: results/part2_output.txt                  ═")
+        _out_label = f"Output saved: results/{_OUTPUT_FILE}"
+        print("  ═   " + _out_label.ljust(56) + "═")
         print("  ═" + " " * 64 + "═")
         print("  " + "═" * 66)
         print()

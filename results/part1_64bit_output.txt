@@ -1,0 +1,136 @@
+
+  ══════════════════════════════════════════════════════════════════
+  ═                                                                ═
+  ═   PART 1 DEMO: KZG Polynomial Commitment Scheme           ═
+  ═   Post-Quantum Security for Artemis zkML                  ═
+  ═   Author : Nilesh R. Barandwal, IIT Dharwad               ═
+  ═   Date   : March 2026                                     ═
+  ═                                                                ═
+  ═   Reference: Lycklama et al. arXiv:2409.12055             ═
+  ═              Definition 2.2 — PC = (Setup, Commit,        ═
+  ═              Verify, Open, Check, BatchOpen, BatchCheck)  ═
+  ═                                                                ═
+  ═   SESSION A — PC.Setup (D=5, SRS generated)              ═
+  ═   SESSION B — PC.Commit (NN weight w=42)                 ═
+  ═   SESSION C — PC.Open + PC.Check (completeness)          ═
+  ═   SESSION D — BSGS Attack recovers τ from SRS            ═
+  ═   SESSION E — Forge commitment and proof (w'=99)         ═
+  ═   SESSION F — BatchOpen + BatchCheck (3 points)          ═
+  ═   SESSION G — Summary Table                              ═
+  ═                                                                ═
+  ══════════════════════════════════════════════════════════════════
+
+
+==================================================================
+  64-BIT ELLIPTIC CURVE SETUP
+==================================================================
+  Equation       :  y² = x³ + 3x + 7  (mod p)
+  Field prime    :  p = 18446744073709551557
+  Bit length     :  64 bits
+  Discriminant   :  4a³ + 27b² = 1431 (mod p) ≠ 0 ✓
+  Generator G    :  (1, 11984760362735376427
+  On curve       :  True ✓
+  Order n ≈      :  18446744073709551557  (≈ 2^63)
+
+  [Classical BSGS complexity]
+  m = ⌈√n⌉       :  ⌈√18446744073709551557⌉ ≈ 2^32 = 4,294,967,296 steps
+  [9-bit demo]   :  ⌈√502⌉ = 23 steps  → 0.03 ms
+  [64-bit curve] :  ⌈√2^64⌉ = 2^32 steps → hours to days
+  [BN254 curve]  :  ⌈√2^254⌉ = 2^127 steps → age of universe
+
+  [Quantum Shor's complexity]
+  All three:     :  O((log n)³) — polynomial time
+  [9-bit demo]   :  O(9³) = 729 quantum ops
+  [64-bit curve] :  O(64³) = 262,144 quantum ops
+  [BN254 curve]  :  O(254³) ≈ 16M quantum ops
+  Conclusion     :  Shor's breaks ALL ECC curves efficiently
+==================================================================
+
+  ██████████████████████████████████████████████████████████████████
+  █          SESSION A — PC.Setup  [Definition 2.2, Op 1]          █
+  ██████████████████████████████████████████████████████████████████
+
+  OBJECTIVE: Generate the Structured Reference String (SRS).
+  The SRS is the public parameter for all KZG operations.
+  The secret trapdoor τ is printed here; Session D will recover
+  the same τ from SRS[1] = τG using BSGS (classical Shor's).
+
+
+==================================================================
+  PC.Setup  [Definition 2.2 — KZG Setup]
+==================================================================
+  Degree bound   :  D = 5
+  Field          :  F_n,  n = 18446744073709551557  (subgroup order)
+  Curve          :  y² = x³ + 3x + 7  (mod 18446744073709551557)
+
+  Step 1 — Secret trapdoor τ  (printed for BSGS verification)
+    τ = 3046665636005803835  ← THIS VALUE IS THE TARGET FOR THE BSGS ATTACK IN SESSION D
+    In production: τ generated in multi-party ceremony, then DESTROYED.
+    Shor's algorithm recovers τ from SRS[1] = τG without ever knowing τ.
+
+  Step 2 — Second generator H  (for hiding commitments)
+    H = 7·G = (3405060366004258634, 11176818310602078111)  [demo only — production uses independently chosen H]
+
+  Step 3 — Compute SRS = [G, τG, τ²G, ..., τᴰG]
+    (D+1 = 6 ECC scalar multiplications)
+
+    SRS[0] = τ^0·G  =  1·G  =  (1, 11984760362735376427)
+    SRS[1] = τ^1·G  =  3046665636005803835·G  =  (15675049434502061043, 828907276177348851)
+    SRS[2] = τ^2·G  =  5451867282288500223·G  =  (16451700673948217876, 1095570238256469098)
+    SRS[3] = τ^3·G  =  15760995086937267275·G  =  (2025370727572305480, 9597227271537474701)
+    SRS[4] = τ^4·G  =  7523144239232853520·G  =  (12575959357104130116, 3350383349811800808)
+    SRS[5] = τ^5·G  =  11393517589441964218·G  =  (12729764976187934315, 12590984659533978508)
+
+  SRS has 6 elements  (supports polynomials of degree ≤ 5)
+  Setup time     :  1169.13 µs
+  ATTACK SURFACE :  SRS[1] = τG = (15675049434502061043, 828907276177348851)  is PUBLIC.
+                    BSGS (or Shor's) recovers τ = 3046665636005803835 from this point.
+==================================================================
+
+  ────────────────────────────────────────────────────────────────
+  SESSION A RESULT:
+    τ (trapdoor)   :  3046665636005803835
+    SRS degree     :  D = 5  (6 elements)
+    SRS[0] = G     :  (1, 11984760362735376427)
+    SRS[1] = τG    :  (15675049434502061043, 828907276177348851)  ← BSGS target in Session D
+    SRS[2] = τ²G   :  (16451700673948217876, 1095570238256469098)
+    SRS[3] = τ³G   :  (2025370727572305480, 9597227271537474701)
+    SRS[4] = τ⁴G   :  (12575959357104130116, 3350383349811800808)
+    SRS[5] = τ⁵G   :  (12729764976187934315, 12590984659533978508)
+
+  ██████████████████████████████████████████████████████████████████
+  █         SESSION B — PC.Commit  [Definition 2.2, Op 2]          █
+  ██████████████████████████████████████████████████████████████████
+
+  OBJECTIVE: Commit to neural network weight w = 42.
+
+  Model context:
+    Neural network  :  y = w·x + b  (single neuron)
+    Weight          :  w = 42  (PRIVATE — this is what we commit to)
+    Bias            :  b = 7
+    Polynomial      :  g(X) = 42  (constant polynomial, degree 0)
+    Coefficients    :  [42]  (g₀ = 42,  all higher coefficients = 0)
+
+  Why a constant polynomial?
+    In Artemis, each scalar weight is committed independently.
+    g(X) = w means 'I commit to the scalar w.'
+    c = g(τ)·G = w·τ⁰·G = w·G  (standard KZG weight commitment).
+
+
+──────────────────────────────────────────────────────────────────
+  PC.Commit  [Definition 2.2 — KZG Commit]
+──────────────────────────────────────────────────────────────────
+  Polynomial g   :  42  (degree 0)
+  Coefficients   :  [42]
+  Degree bound   :  d = 0
+  Randomness     :  r = 0  (non-hiding — r=0)
+
+  g(τ) = g(3046665636005803835) = 42  (scalar, computed mod n=18446744073709551557)
+
+  Computing c = Σ gᵢ · SRS[i]  +  r·H :
+    g[0] · SRS[0]  =  42 · (1, 11984760362735376427)  =  (575788410645544901, 11864752821586955089)
+
+  Commitment c   :  (575788410645544901, 11864752821586955089)
+  Verify on curve:  True ✓
+  g(τ)·G + r·H   :  matches c
+──────────────────────────────────────────────────────────────────
