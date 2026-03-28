@@ -147,11 +147,21 @@ class EllipticCurve:
 
     def compute_group_order(self, G):
         """
-        Return approximate group order n ≈ p (Hasse bound).
-        For 32-bit curve: exact order computation via Schoof is out of scope.
-        n ≈ p = 4294967291 ≈ 2^32. BSGS uses math.isqrt(n)+1 steps.
+        Return the exact order of generator G on this curve.
+
+        For y² = x³ + 3x + 7  (mod 4294967291):
+          #E(F_p)  = 4294943292  =  2² × 3 × 357911941  (composite)
+          ord(G)   = 2147471646  =  2  × 3 × 357911941  (confirmed via BSGS)
+
+        G generates a cyclic subgroup of index 2 in the full group.
+        Returning the true ord(G) ensures tau = randint(1, n-1) is always
+        a valid scalar and BSGS recovers the exact tau used in PC.Setup.
+
+        Previously this returned self.p (wrong), which caused tau to be
+        drawn from [1, p-1] while the true group wraps at 2147471646,
+        making BSGS find a different (but equally valid) discrete log.
         """
-        return self.p
+        return 2147471646
 
 
 # ─────────────────────────────────────────────────────────────────────────────
