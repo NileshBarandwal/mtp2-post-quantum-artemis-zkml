@@ -64,7 +64,7 @@
   Curve          :  y² = x³ + 3x + 7  (mod 4294967291)
 
   Step 1 — Secret trapdoor τ  (printed for BSGS verification)
-    τ = 1431144195  ← THIS VALUE IS THE TARGET FOR THE BSGS ATTACK IN SESSION D
+    τ = 510835792  ← THIS VALUE IS THE TARGET FOR THE BSGS ATTACK IN SESSION D
     In production: τ generated in multi-party ceremony, then DESTROYED.
     Shor's algorithm recovers τ from SRS[1] = τG without ever knowing τ.
 
@@ -75,28 +75,28 @@
     (D+1 = 6 ECC scalar multiplications)
 
     SRS[0] = τ^0·G  =  1·G  =  (1, 1789981121)
-    SRS[1] = τ^1·G  =  1431144195·G  =  (425125196, 558767061)
-    SRS[2] = τ^2·G  =  895907415·G  =  (3732300849, 757784279)
-    SRS[3] = τ^3·G  =  379685775·G  =  (1729348375, 514114377)
-    SRS[4] = τ^4·G  =  4498989·G  =  (377286774, 2843783792)
-    SRS[5] = τ^5·G  =  31194789·G  =  (691227188, 498716784)
+    SRS[1] = τ^1·G  =  510835792·G  =  (3937206733, 718003213)
+    SRS[2] = τ^2·G  =  329182954·G  =  (263836618, 4120714562)
+    SRS[3] = τ^3·G  =  2063249308·G  =  (1012991550, 2620157732)
+    SRS[4] = τ^4·G  =  94477762·G  =  (3874109977, 2899620464)
+    SRS[5] = τ^5·G  =  1009990144·G  =  (1110367298, 3645438150)
 
   SRS has 6 elements  (supports polynomials of degree ≤ 5)
-  Setup time     :  261.25 µs
-  ATTACK SURFACE :  SRS[1] = τG = (425125196, 558767061)  is PUBLIC.
-                    BSGS (or Shor's) recovers τ = 1431144195 from this point.
+  Setup time     :  440.67 µs
+  ATTACK SURFACE :  SRS[1] = τG = (3937206733, 718003213)  is PUBLIC.
+                    BSGS (or Shor's) recovers τ = 510835792 from this point.
 ==================================================================
 
   ────────────────────────────────────────────────────────────────
   SESSION A RESULT:
-    τ (trapdoor)   :  1431144195
+    τ (trapdoor)   :  510835792
     SRS degree     :  D = 5  (6 elements)
     SRS[0] = G     :  (1, 1789981121)
-    SRS[1] = τG    :  (425125196, 558767061)  ← BSGS target in Session D
-    SRS[2] = τ²G   :  (3732300849, 757784279)
-    SRS[3] = τ³G   :  (1729348375, 514114377)
-    SRS[4] = τ⁴G   :  (377286774, 2843783792)
-    SRS[5] = τ⁵G   :  (691227188, 498716784)
+    SRS[1] = τG    :  (3937206733, 718003213)  ← BSGS target in Session D
+    SRS[2] = τ²G   :  (263836618, 4120714562)
+    SRS[3] = τ³G   :  (1012991550, 2620157732)
+    SRS[4] = τ⁴G   :  (3874109977, 2899620464)
+    SRS[5] = τ⁵G   :  (1110367298, 3645438150)
 
   ██████████████████████████████████████████████████████████████████
   █         SESSION B — PC.Commit  [Definition 2.2, Op 2]          █
@@ -125,7 +125,7 @@
   Degree bound   :  d = 0
   Randomness     :  r = 0  (non-hiding — r=0)
 
-  g(τ) = g(1431144195) = 42  (scalar, computed mod n=2147471646)
+  g(τ) = g(510835792) = 42  (scalar, computed mod n=2147471646)
 
   Computing c = Σ gᵢ · SRS[i]  +  r·H :
     g[0] · SRS[0]  =  42 · (1, 1789981121)  =  (3803448500, 1715602834)
@@ -174,7 +174,7 @@
            Remainder = 0  (should be 0 — exact division ✓)
 
   Step 4 — π = q(τ)·G
-           q(τ) = q(1431144195) = 0  (scalar)
+           q(τ) = q(510835792) = 0  (scalar)
            π    = None  (EC point proof)
 
   Summary:
@@ -196,8 +196,8 @@
   [Production BN254]  e(c - y·G, G₂) == e(π, (τ-x)·G₂)
   [This demo]         (τ - x)·π == c - y·G  (equivalent, no pairings)
 
-  LHS = (τ - x)·π = (1431144195 - 3)·None
-      = 1431144192·π = None
+  LHS = (τ - x)·π = (510835792 - 3)·None
+      = 510835789·π = None
   RHS = c - y·G   = (3803448500, 1715602834) - 42·(1, 1789981121)
       = (3803448500, 1715602834) + (-42)·G = None
   LHS == RHS     :  True
@@ -220,7 +220,7 @@
   from the PUBLIC SRS using BSGS (classical analogue of Shor's).
 
   ATTACKER'S KNOWLEDGE:
-    SRS[1] = τG = (425125196, 558767061)  (public — in the SRS)
+    SRS[1] = τG = (3937206733, 718003213)  (public — in the SRS)
     G = (1, 1789981121)  (public generator)
     n = 2147471646  (public group order)
     Target: find τ such that τ·G = SRS[1]
@@ -233,27 +233,27 @@
     [256-bit]  : O(√2²⁵⁶) = O(2¹²⁸) classically infeasible;
                  Shor's does it in O(256³) ≈ 16M quantum ops
 
-  Running BSGS on target = SRS[1] = (425125196, 558767061) ...
+  Running BSGS on target = SRS[1] = (3937206733, 718003213) ...
 
   ATTACK RESULT:
-    τ recovered    :  1431144195
-    τ from Setup   :  1431144195  (Session A)
+    τ recovered    :  510835792
+    τ from Setup   :  510835792  (Session A)
     Match          :  True  ✓ — TRAPDOOR CONFIRMED EXPOSED
-    Verify         :  1431144195·G = (425125196, 558767061)
-                      SRS[1]         = (425125196, 558767061)
-    Time           :  75.2150 ms  (46341 steps)
+    Verify         :  510835792·G = (3937206733, 718003213)
+                      SRS[1]         = (3937206733, 718003213)
+    Time           :  57.5956 ms  (46341 steps)
 
   CONSEQUENCE:
-    Attacker now knows τ = 1431144195.
+    Attacker now knows τ = 510835792.
     With τ, they can forge ANY KZG proof for ANY polynomial.
     The entire Artemis integrity guarantee is broken.
 
   ────────────────────────────────────────────────────────────────
   SESSION D RESULT:
-    BSGS recovered :  τ = 1431144195
-    Session A τ    :  1431144195
+    BSGS recovered :  τ = 510835792
+    Session A τ    :  510835792
     Attack         :  SUCCESS — τ EXPOSED
-    Attack time    :  75.2150 ms
+    Attack time    :  57.5956 ms
 
   ██████████████████████████████████████████████████████████████████
   █SESSION E — Forge Commitment & Proof  [Artemis Guarantee Broken]█
@@ -264,7 +264,7 @@
   and produces a valid opening proof.  The verifier is fooled.
 
   ATTACKER STATE (after Session D):
-    τ recovered    :  1431144195
+    τ recovered    :  510835792
     True commit c  :  (3803448500, 1715602834)  (for w=42)
     Fake weight    :  w' = 99
 
@@ -303,8 +303,8 @@
   [Production BN254]  e(c - y·G, G₂) == e(π, (τ-x)·G₂)
   [This demo]         (τ - x)·π == c - y·G  (equivalent, no pairings)
 
-  LHS = (τ - x)·π = (1431144195 - 3)·None
-      = 1431144192·π = None
+  LHS = (τ - x)·π = (510835792 - 3)·None
+      = 510835789·π = None
   RHS = c - y·G   = (2264640393, 3364118292) - 99·(1, 1789981121)
       = (2264640393, 3364118292) + (-99)·G = None
   LHS == RHS     :  True
@@ -344,14 +344,14 @@
   Degree bound   :  d = 2
   Randomness     :  r = 0  (non-hiding — r=0)
 
-  g(τ) = g(1431144195) = 1255067344  (scalar, computed mod n=2147471646)
+  g(τ) = g(510835792) = 2009220447  (scalar, computed mod n=2147471646)
 
   Computing c = Σ gᵢ · SRS[i]  +  r·H :
     g[0] · SRS[0]  =  1 · (1, 1789981121)  =  (1, 1789981121)
-    g[1] · SRS[1]  =  2 · (425125196, 558767061)  =  (2791395740, 1802901899)
-    g[2] · SRS[2]  =  3 · (3732300849, 757784279)  =  (903372937, 3889658165)
+    g[1] · SRS[1]  =  2 · (3937206733, 718003213)  =  (654503741, 2528014720)
+    g[2] · SRS[2]  =  3 · (263836618, 4120714562)  =  (3538919882, 1041558524)
 
-  Commitment c   :  (3306106831, 3563925388)
+  Commitment c   :  (1117231110, 3988555678)
   Verify on curve:  True ✓
   g(τ)·G + r·H   :  matches c
 ──────────────────────────────────────────────────────────────────
@@ -363,8 +363,8 @@
 ──────────────────────────────────────────────────────────────────
   Claimed poly g :  1 + 2X + 3X^2
   Randomness r   :  0
-  Recomputed c'  :  (3306106831, 3563925388)
-  Committed c    :  (3306106831, 3563925388)
+  Recomputed c'  :  (1117231110, 3988555678)
+  Committed c    :  (1117231110, 3988555678)
   c' == c        :  True
   PC.Verify      :  1  ← VALID COMMITMENT ✓
 ──────────────────────────────────────────────────────────────────
@@ -388,7 +388,7 @@
   Challenge ξ    :  37
 
   Step 1 — Z(X) = Π(X - xᵢ) = -8 + 14X + -7X^2 + X^3
-           Z(τ) = 1259522716  (integer evaluation, reduced mod n for EC)
+           Z(τ) = 468254772  (integer evaluation, reduced mod n for EC)
 
   Step 2 — I(X) = Lagrange interpolant = 1 + 2X + 3X^2
            I(1) = 6  (should be 6)
@@ -400,7 +400,7 @@
            h(X)        = 0
 
   Step 4 — π = h(τ)·G
-           h(τ) = h(1431144195) = 0  (scalar)
+           h(τ) = h(510835792) = 0  (scalar)
            π    = None  (batched proof point)
 
   One proof π covers all 3 evaluation points simultaneously.
@@ -411,18 +411,18 @@
 ──────────────────────────────────────────────────────────────────
   PC.BatchCheck  [Definition 2.2 — Verify Batched Proof]
 ──────────────────────────────────────────────────────────────────
-  Commitment c   :  (3306106831, 3563925388)
+  Commitment c   :  (1117231110, 3988555678)
   Eval points Q  :  [1, 2, 4]
   Claimed values :  [6, 17, 57]
   Proof π        :  None
   Challenge ξ    :  37
 
-  Step 1 — Z(τ) = 1259522716  (integer eval, reduced mod n for EC)
-  Step 2 — I(τ) = 1255067344,   I(τ)·G = (3306106831, 3563925388)
+  Step 1 — Z(τ) = 468254772  (integer eval, reduced mod n for EC)
+  Step 2 — I(τ) = 2009220447,   I(τ)·G = (1117231110, 3988555678)
 
-  LHS = Z(τ)·π          = 1259522716·None
+  LHS = Z(τ)·π          = 468254772·None
       = None
-  RHS = c - I(τ)·G      = (3306106831, 3563925388) - 1255067344·G
+  RHS = c - I(τ)·G      = (1117231110, 3988555678) - 2009220447·G
       = None
   LHS == RHS            :  True
   PC.BatchCheck         :  1  ← ALL EVALUATIONS VALID ✓
@@ -431,7 +431,7 @@
   ────────────────────────────────────────────────────────────────
   SESSION F RESULT:
     Polynomial     :  1 + 2X + 3X^2
-    Commitment c   :  (3306106831, 3563925388)
+    Commitment c   :  (1117231110, 3988555678)
     Eval points    :  [1, 2, 4]
     Evaluations    :  [6, 17, 57]
     Batch proof π  :  None
@@ -450,7 +450,7 @@
 
   Operation              | Result
   ───────────────────────┼─────────────────────────────────────────────────
-  PC.Setup (D=5)         | τ = 1431144195,  SRS = [G, τG, τ²G, τ³G, τ⁴G, τ⁵G]
+  PC.Setup (D=5)         | τ = 510835792,  SRS = [G, τG, τ²G, τ³G, τ⁴G, τ⁵G]
   PC.Commit (w=42)       | c = (3803448500, 1715602834)
   PC.Open (x=3)          | π = quotient proof,  g(3) = 42
   PC.Check (honest)      | PASS ✓ — completeness holds
@@ -458,7 +458,7 @@
   PC.BatchOpen (3 pts)   | Single π covers 3 evaluation points
   PC.BatchCheck          | PASS ✓ — batch proof valid
   ───────────────────────┼─────────────────────────────────────────────────
-  BSGS Attack on SRS     | τ = 1431144195 recovered in 75.2150 ms  (46341 steps) — BROKEN ✗
+  BSGS Attack on SRS     | τ = 510835792 recovered in 57.5956 ms  (46341 steps) — BROKEN ✗
   τ match (Setup vs BSGS) | CONFIRMED ✓ — trapdoor exposed
   Forged commit c_fake   | c_fake = (2264640393, 3364118292)  (w'=99)
   PC.Check (forged)      | PASS ✓ — FORGERY ACCEPTED ✗
@@ -467,9 +467,9 @@
 
   ATTACK CHAIN SUMMARY:
 
-    1. [PC.Setup]   SRS published. τ = 1431144195 hidden inside SRS[1] = τG.
+    1. [PC.Setup]   SRS published. τ = 510835792 hidden inside SRS[1] = τG.
     2. [PC.Commit]  Model owner commits: c = 42·G = (3803448500, 1715602834).
-    3. [BSGS]       Attacker runs BSGS on SRS[1] → τ = 1431144195 recovered.
+    3. [BSGS]       Attacker runs BSGS on SRS[1] → τ = 510835792 recovered.
                     (Shor's does this in O((log n)³) — quantum feasible.)
     4. [Forgery]    Attacker computes c_fake = 99·G and valid proof π.
     5. [PC.Check]   Verifier checks forged proof → PASS.
@@ -492,13 +492,13 @@
   ══════════════════════════════════════════════════════════════════
   ═                                                                ═
   ═   PART 1 DEMO COMPLETE                                     ═
-  ═   Session A (Setup)    :    0.28 ms                        ═
-  ═   Session B (Commit)   :    0.07 ms                        ═
+  ═   Session A (Setup)    :    0.46 ms                        ═
+  ═   Session B (Commit)   :    0.06 ms                        ═
   ═   Session C (Open/Chk) :    0.04 ms                        ═
-  ═   Session D (BSGS)     :   75.34 ms  ← attack time          ═
-  ═   Session E (Forgery)  :    0.10 ms                        ═
-  ═   Session F (Batch)    :    0.25 ms                        ═
-  ═   Total runtime        :   76.16 ms                        ═
+  ═   Session D (BSGS)     :   57.73 ms  ← attack time          ═
+  ═   Session E (Forgery)  :    0.11 ms                        ═
+  ═   Session F (Batch)    :    0.27 ms                        ═
+  ═   Total runtime        :   58.75 ms                        ═
   ═   Output saved: results/part1_32bit_output.txt            ═
   ═                                                                ═
   ══════════════════════════════════════════════════════════════════

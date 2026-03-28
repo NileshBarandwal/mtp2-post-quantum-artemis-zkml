@@ -48,10 +48,10 @@
   Domain           :  xs = [0, 1, 2, 3, 4, 5, 6]
   Domain size      :  D+2 = 7  points
   Hash function    :  SHA-256 (Poseidon in production)
-  Nonce            :  5f54bbaca47b55d5861761b973dc1d9c  (public random, 16 bytes)
+  Nonce            :  46495750273ab3b3ba3322c128b2b069  (public random, 16 bytes)
   Nonce size       :  16 bytes
 
-  Setup time       :  15.67 µs
+  Setup time       :  3.37 µs
 
   ┌─────────────────────────────────────────────────────────┐
   │  No secret trapdoor. No trusted setup. No toxic waste.  │
@@ -65,10 +65,10 @@
     Scheme         :  FRI-style Hash-based Commitment
     Degree bound   :  D = 5
     Domain         :  xs = [0, 1, 2, 3, 4, 5, 6]
-    Nonce          :  5f54bbaca47b55d5861761b973dc1d9c  (16 bytes, public)
+    Nonce          :  46495750273ab3b3ba3322c128b2b069  (16 bytes, public)
     Secret τ       :  NONE — no trapdoor exists
     SRS            :  NONE — no trusted setup required
-    Setup time     :  15.67 µs
+    Setup time     :  3.37 µs
 
     [KZG Part 1]   τ = 499,  SRS generated,  trusted setup required
     [FRI Part 2]   No secret. No SRS. No ceremony.
@@ -110,62 +110,62 @@
 
   Step 2 — Hash each evaluation:
     leaf[i] = SHA256(str(g(xᵢ)).encode() ‖ nonce)
-    leaf[0] = SHA256('42' ‖ nonce) = d797d481e32d84b7a9a08b23ac924fac...
-    leaf[1] = SHA256('42' ‖ nonce) = d797d481e32d84b7a9a08b23ac924fac...
-    leaf[2] = SHA256('42' ‖ nonce) = d797d481e32d84b7a9a08b23ac924fac...
-    leaf[3] = SHA256('42' ‖ nonce) = d797d481e32d84b7a9a08b23ac924fac...
-    leaf[4] = SHA256('42' ‖ nonce) = d797d481e32d84b7a9a08b23ac924fac...
-    leaf[5] = SHA256('42' ‖ nonce) = d797d481e32d84b7a9a08b23ac924fac...
-    leaf[6] = SHA256('42' ‖ nonce) = d797d481e32d84b7a9a08b23ac924fac...
+    leaf[0] = SHA256('42' ‖ nonce) = faf544784b11de81cff1bf092a461166...
+    leaf[1] = SHA256('42' ‖ nonce) = faf544784b11de81cff1bf092a461166...
+    leaf[2] = SHA256('42' ‖ nonce) = faf544784b11de81cff1bf092a461166...
+    leaf[3] = SHA256('42' ‖ nonce) = faf544784b11de81cff1bf092a461166...
+    leaf[4] = SHA256('42' ‖ nonce) = faf544784b11de81cff1bf092a461166...
+    leaf[5] = SHA256('42' ‖ nonce) = faf544784b11de81cff1bf092a461166...
+    leaf[6] = SHA256('42' ‖ nonce) = faf544784b11de81cff1bf092a461166...
 
   Step 3 — Build Merkle tree:
     Padded leaf count : 8  (next power of 2 ≥ 7)
     Number of levels  : 3
 
     ── Leaf level (level 3, 8 nodes) ──
-      [ 0] = d797d481e32d84b7a9a08b23ac924facebb5875504ce35df...  [real]
-      [ 1] = d797d481e32d84b7a9a08b23ac924facebb5875504ce35df...  [real]
-      [ 2] = d797d481e32d84b7a9a08b23ac924facebb5875504ce35df...  [real]
-      [ 3] = d797d481e32d84b7a9a08b23ac924facebb5875504ce35df...  [real]
-      [ 4] = d797d481e32d84b7a9a08b23ac924facebb5875504ce35df...  [real]
-      [ 5] = d797d481e32d84b7a9a08b23ac924facebb5875504ce35df...  [real]
-      [ 6] = d797d481e32d84b7a9a08b23ac924facebb5875504ce35df...  [real]
+      [ 0] = faf544784b11de81cff1bf092a4611666e48a8e39fa6f983...  [real]
+      [ 1] = faf544784b11de81cff1bf092a4611666e48a8e39fa6f983...  [real]
+      [ 2] = faf544784b11de81cff1bf092a4611666e48a8e39fa6f983...  [real]
+      [ 3] = faf544784b11de81cff1bf092a4611666e48a8e39fa6f983...  [real]
+      [ 4] = faf544784b11de81cff1bf092a4611666e48a8e39fa6f983...  [real]
+      [ 5] = faf544784b11de81cff1bf092a4611666e48a8e39fa6f983...  [real]
+      [ 6] = faf544784b11de81cff1bf092a4611666e48a8e39fa6f983...  [real]
       [ 7] = 000000000000000000000000000000000000000000000000...  [padding]
     ── Level 2 (4 nodes) ──
-      [ 4] = 2364e33881e437ec299426ca99abccbac0213012f69088d7...
-      [ 5] = 2364e33881e437ec299426ca99abccbac0213012f69088d7...
-      [ 6] = 2364e33881e437ec299426ca99abccbac0213012f69088d7...
-      [ 7] = 2ccc79a82d80c2b36aa7e7815ae0d6d453b3216f63ff332c...
+      [ 4] = be410d020ead846d11e9e32a5e537c8605bbc9b5c8726c05...
+      [ 5] = be410d020ead846d11e9e32a5e537c8605bbc9b5c8726c05...
+      [ 6] = be410d020ead846d11e9e32a5e537c8605bbc9b5c8726c05...
+      [ 7] = 1da8c06ab4f8b466ee19b26aff9151451076fbe2b26d5251...
     ── Level 1 (2 nodes) ──
-      [ 2] = 2840b8d1dbb0c1e745763c961a071eeeb4ce122bb2c40781...
-      [ 3] = 74b6745f42895cb747d8c1ca2e0b861c2c46c032405dfb1d...
+      [ 2] = 60872b28d61b1a8b8da09bafd96eadeece693fefa0671fc7...
+      [ 3] = dea6e32a79f1ac6afb6b54d28053f2c885e51ae9eb9a3f94...
     ── Root (level 0) ──
-      root = 7230e20adbafba03eb1827f68aeca1156fd791632233574aadb1fdc211b5a031
+      root = 5e2a0a0745d9977296b643e91a665bde0f25912659365d7cd60d8b34d4129683
 
-  Commitment root  :  7230e20adbafba03eb1827f68aeca1156fd791632233574aadb1fdc211b5a031
+  Commitment root  :  5e2a0a0745d9977296b643e91a665bde0f25912659365d7cd60d8b34d4129683
   Root size        :  32 bytes  (SHA-256 output, fixed)
-  Commit time      :  70.54 µs
+  Commit time      :  19.96 µs
   Proof size (open):  3 × 32 = 96 bytes  (Merkle path)
 ──────────────────────────────────────────────────────────────────
 
 ──────────────────────────────────────────────────────────────────
   PC.Verify  [Recompute and compare Merkle root]
 ──────────────────────────────────────────────────────────────────
-  Recomputed root  :  7230e20adbafba03eb1827f68aeca1156fd791632233574aadb1fdc211b5a031
-  Committed root   :  7230e20adbafba03eb1827f68aeca1156fd791632233574aadb1fdc211b5a031
+  Recomputed root  :  5e2a0a0745d9977296b643e91a665bde0f25912659365d7cd60d8b34d4129683
+  Committed root   :  5e2a0a0745d9977296b643e91a665bde0f25912659365d7cd60d8b34d4129683
   Match            :  True
   PC.Verify        :  1  ← VALID ✓
-  Verify time      :  16.17 µs
+  Verify time      :  8.67 µs
 ──────────────────────────────────────────────────────────────────
 
   ────────────────────────────────────────────────────────────────
   SESSION B RESULT:
     Polynomial     :  g(X) = 42  (encodes weight w=42)
-    Commitment root:  7230e20adbafba03eb1827f68aeca1156fd791632233574aadb1fdc211b5a031
+    Commitment root:  5e2a0a0745d9977296b643e91a665bde0f25912659365d7cd60d8b34d4129683
     Root size      :  32 bytes  (SHA-256 output)
     PC.Verify      :  1  ✓
-    Commit time    :  70.54 µs
-    Verify time    :  16.17 µs
+    Commit time    :  19.96 µs
+    Verify time    :  8.67 µs
 
     KZG commitment :  64 bytes (ECC point, e.g. (1019, 920) at production scale)
     FRI commitment :  32 bytes (hash root) — SMALLER and POST-QUANTUM SECURE
@@ -189,12 +189,12 @@
   Domain index   :  x = 3  (domain point xs[3] = 3)
   Evaluation     :  y = g(3) = 42
   Merkle path    :  3 sibling hashes
-    path[0] = d797d481e32d84b7a9a08b23ac924facebb5875504ce35dfae787e5eb68c06c1
-    path[1] = 2364e33881e437ec299426ca99abccbac0213012f69088d77dba056099cc3124
-    path[2] = 74b6745f42895cb747d8c1ca2e0b861c2c46c032405dfb1decdde158a6007878
+    path[0] = faf544784b11de81cff1bf092a4611666e48a8e39fa6f983da6df79e4310f621
+    path[1] = be410d020ead846d11e9e32a5e537c8605bbc9b5c8726c052c1bf3f673dd103b
+    path[2] = dea6e32a79f1ac6afb6b54d28053f2c885e51ae9eb9a3f94f9dbd73581d28a42
 
   Proof size     :  3 × 32 = 96 bytes
-  Open time      :  6.79 µs
+  Open time      :  1.25 µs
 ──────────────────────────────────────────────────────────────────
 
   ── PC.Check (honest proof) ──────────────────────────────────────
@@ -203,28 +203,28 @@
   PC.Check  [Walk Merkle path from leaf to root]
 ──────────────────────────────────────────────────────────────────
   Claimed y       :  42
-  Leaf hash       :  SHA256('42' ‖ nonce) = d797d481e32d84b7a9a08b23ac924facebb5875504ce35dfae787e5eb68c06c1
+  Leaf hash       :  SHA256('42' ‖ nonce) = faf544784b11de81cff1bf092a4611666e48a8e39fa6f983da6df79e4310f621
   Merkle path     :  3 sibling hashes
 
   Walking Merkle path:
     Step 1: pos=3 (right child)
-             sibling  = d797d481e32d84b7a9a08b23ac924facebb5875504ce35dfae787e5eb68c06c1
+             sibling  = faf544784b11de81cff1bf092a4611666e48a8e39fa6f983da6df79e4310f621
              parent   = SHA256(sibling ‖ current)
-             result   = 2364e33881e437ec299426ca99abccbac0213012f69088d77dba056099cc3124
+             result   = be410d020ead846d11e9e32a5e537c8605bbc9b5c8726c052c1bf3f673dd103b
     Step 2: pos=1 (right child)
-             sibling  = 2364e33881e437ec299426ca99abccbac0213012f69088d77dba056099cc3124
+             sibling  = be410d020ead846d11e9e32a5e537c8605bbc9b5c8726c052c1bf3f673dd103b
              parent   = SHA256(sibling ‖ current)
-             result   = 2840b8d1dbb0c1e745763c961a071eeeb4ce122bb2c40781c7a22555243cf49f
+             result   = 60872b28d61b1a8b8da09bafd96eadeece693fefa0671fc79dfcfca29c17f58c
     Step 3: pos=0 (left child)
-             sibling  = 74b6745f42895cb747d8c1ca2e0b861c2c46c032405dfb1decdde158a6007878
+             sibling  = dea6e32a79f1ac6afb6b54d28053f2c885e51ae9eb9a3f94f9dbd73581d28a42
              parent   = SHA256(current ‖ sibling)
-             result   = 7230e20adbafba03eb1827f68aeca1156fd791632233574aadb1fdc211b5a031
+             result   = 5e2a0a0745d9977296b643e91a665bde0f25912659365d7cd60d8b34d4129683
 
-  Computed root   :  7230e20adbafba03eb1827f68aeca1156fd791632233574aadb1fdc211b5a031
-  Expected root   :  7230e20adbafba03eb1827f68aeca1156fd791632233574aadb1fdc211b5a031
+  Computed root   :  5e2a0a0745d9977296b643e91a665bde0f25912659365d7cd60d8b34d4129683
+  Expected root   :  5e2a0a0745d9977296b643e91a665bde0f25912659365d7cd60d8b34d4129683
   Match           :  True
   PC.Check        :  1  ← VALID ✓
-  Check time      :  17.92 µs
+  Check time      :  12.00 µs
 ──────────────────────────────────────────────────────────────────
 
   ────────────────────────────────────────────────────────────────
@@ -233,8 +233,8 @@
     Claimed value  :  y = g(3) = 42
     Proof path     :  3 hashes  (96 bytes)
     PC.Check       :  PASS ✓ — completeness holds
-    Open time      :  6.79 µs
-    Check time     :  17.92 µs
+    Open time      :  1.25 µs
+    Check time     :  12.00 µs
     Proof size     :  96 bytes  (3 × 32)
 
     KZG proof      :  ECC point, 64 bytes (production scale)
@@ -247,7 +247,7 @@
   OBJECTIVE: Show WHY BSGS cannot work against FRI/hash commitment.
 
   What the attacker sees:
-    FRI root = 7230e20adbafba03eb1827f68aeca1156fd791632233574aadb1fdc211b5a031
+    FRI root = 5e2a0a0745d9977296b643e91a665bde0f25912659365d7cd60d8b34d4129683
     (32-byte SHA-256 hash — public)
 
   ── WHY BSGS FAILS ───────────────────────────────────────────────
@@ -280,7 +280,7 @@
     Attack cannot proceed: no group law on hash output.
 
   RESULT: BSGS FAILED — no group structure in SHA-256 output.
-  Attack time     : 0.0273 ms  → FAILED
+  Attack time     : 0.0193 ms  → FAILED
 
   ── BRUTE FORCE COST ANALYSIS ────────────────────────────────────
 
@@ -304,7 +304,7 @@
   SESSION D RESULT:
     Attack type    :  BSGS (classical analogue of Shor's)
     Target         :  FRI Merkle root  (32 bytes, SHA-256 hash)
-    Attack time    :  0.0273 ms
+    Attack time    :  0.0193 ms
     Attack outcome :  FAILED — no group structure in hash output
     Reason         :  BSGS requires Q = w·G; hash root ≠ ECC point
     Shor's outcome :  FAILED — hash functions have no cyclic group
@@ -320,10 +320,10 @@
   ── Step 1: Attacker computes fake leaf ──────────────────────────
 
     Real leaf at x=3: SHA256('42' ‖ nonce)
-    real_leaf = d797d481e32d84b7a9a08b23ac924facebb5875504ce35dfae787e5eb68c06c1
+    real_leaf = faf544784b11de81cff1bf092a4611666e48a8e39fa6f983da6df79e4310f621
 
     Fake leaf at x=3: SHA256('99' ‖ nonce)
-    fake_leaf = 3b8b79b3c0f81fe4b73a29506e8d5cc653a9d4f674090093da2edaf861f4702e
+    fake_leaf = 4ade95972bcf0a0419555738f90d34b3533f0bc45ddaf4995a36712dd0f87bdb
 
     real_leaf == fake_leaf? False
     (Different inputs → different outputs by SHA-256 collision resistance)
@@ -334,8 +334,8 @@
     but substitutes the fake leaf for the real leaf.
     If successful, they would claim g(3) = 99 with the real root.
 
-    real_root (committed)     : 7230e20adbafba03eb1827f68aeca1156fd791632233574aadb1fdc211b5a031
-    fake_root (from fake leaf): 561301e3948cd7a23a0a30f79e7eb64b9ce9aa7a86adc5493e0fa18f8952ba42
+    real_root (committed)     : 5e2a0a0745d9977296b643e91a665bde0f25912659365d7cd60d8b34d4129683
+    fake_root (from fake leaf): 97db05b0522aaab1bc38bd7ec69e04feaff8c462e58efad3044b94ce8b68212b
     Same root?                : False
 
     The fake leaf propagates a DIFFERENT hash up the tree.
@@ -348,38 +348,38 @@
   PC.Check  [Walk Merkle path from leaf to root]
 ──────────────────────────────────────────────────────────────────
   Claimed y       :  99
-  Leaf hash       :  SHA256('99' ‖ nonce) = 3b8b79b3c0f81fe4b73a29506e8d5cc653a9d4f674090093da2edaf861f4702e
+  Leaf hash       :  SHA256('99' ‖ nonce) = 4ade95972bcf0a0419555738f90d34b3533f0bc45ddaf4995a36712dd0f87bdb
   Merkle path     :  3 sibling hashes
 
   Walking Merkle path:
     Step 1: pos=3 (right child)
-             sibling  = d797d481e32d84b7a9a08b23ac924facebb5875504ce35dfae787e5eb68c06c1
+             sibling  = faf544784b11de81cff1bf092a4611666e48a8e39fa6f983da6df79e4310f621
              parent   = SHA256(sibling ‖ current)
-             result   = b3c432db7276542ccca973c503b378b57bc90821a7d40e79d85c86795bb65394
+             result   = 0073c81e0bdecb0d5cc6905b39fc5caeb4c10618af7c3d8a72d20ad84124b4db
     Step 2: pos=1 (right child)
-             sibling  = 2364e33881e437ec299426ca99abccbac0213012f69088d77dba056099cc3124
+             sibling  = be410d020ead846d11e9e32a5e537c8605bbc9b5c8726c052c1bf3f673dd103b
              parent   = SHA256(sibling ‖ current)
-             result   = 5c73647977ade70a6a3ad60abd9067e049bd50a6706fcddfb126428c84a1c375
+             result   = c964bd74d698af309e8f5d6e93de1777f2aca2833ac30d68ba15b7e506f9e290
     Step 3: pos=0 (left child)
-             sibling  = 74b6745f42895cb747d8c1ca2e0b861c2c46c032405dfb1decdde158a6007878
+             sibling  = dea6e32a79f1ac6afb6b54d28053f2c885e51ae9eb9a3f94f9dbd73581d28a42
              parent   = SHA256(current ‖ sibling)
-             result   = 561301e3948cd7a23a0a30f79e7eb64b9ce9aa7a86adc5493e0fa18f8952ba42
+             result   = 97db05b0522aaab1bc38bd7ec69e04feaff8c462e58efad3044b94ce8b68212b
 
-  Computed root   :  561301e3948cd7a23a0a30f79e7eb64b9ce9aa7a86adc5493e0fa18f8952ba42
-  Expected root   :  7230e20adbafba03eb1827f68aeca1156fd791632233574aadb1fdc211b5a031
+  Computed root   :  97db05b0522aaab1bc38bd7ec69e04feaff8c462e58efad3044b94ce8b68212b
+  Expected root   :  5e2a0a0745d9977296b643e91a665bde0f25912659365d7cd60d8b34d4129683
   Match           :  False
   PC.Check        :  0  ← INVALID ✗
-  Check time      :  12.00 µs
+  Check time      :  10.75 µs
 ──────────────────────────────────────────────────────────────────
 
   ────────────────────────────────────────────────────────────────
   SESSION E RESULT:
-    Real commitment root   :  7230e20adbafba03eb1827f68aeca1156fd791632233574aadb1fdc211b5a031
-    Fake leaf (y=99)   :  3b8b79b3c0f81fe4b73a29506e8d5cc653a9d4f674090093da2edaf861f4702e
-    Fake computed root     :  561301e3948cd7a23a0a30f79e7eb64b9ce9aa7a86adc5493e0fa18f8952ba42
+    Real commitment root   :  5e2a0a0745d9977296b643e91a665bde0f25912659365d7cd60d8b34d4129683
+    Fake leaf (y=99)   :  4ade95972bcf0a0419555738f90d34b3533f0bc45ddaf4995a36712dd0f87bdb
+    Fake computed root     :  97db05b0522aaab1bc38bd7ec69e04feaff8c462e58efad3044b94ce8b68212b
     Roots match            :  False  ← DIFFERENT
     PC.Check (fake y=99) :  0  ← FORGERY REJECTED — SECURE ✓
-    Forge attempt time     :  12.00 µs
+    Forge attempt time     :  10.75 µs
 
     [KZG Part 1]  c_fake = 99·G  PASSED PC.Check  (broken — group homomorphism)
     [FRI Part 2]  fake root       REJECTED by PC.Check  (secure — hash collision)
@@ -417,41 +417,41 @@
 
   Step 2 — Hash each evaluation:
     leaf[i] = SHA256(str(g(xᵢ)).encode() ‖ nonce)
-    leaf[0] = SHA256('1' ‖ nonce) = 527602fa9618144e28a216ea84225b41...
-    leaf[1] = SHA256('6' ‖ nonce) = 99b6289ffccd0cc61cba62559d963549...
-    leaf[2] = SHA256('17' ‖ nonce) = 2f61048fa29bf041be8215c6ec7d3211...
-    leaf[3] = SHA256('34' ‖ nonce) = ab18ee3379dd4d9da887f132f6fb35ce...
-    leaf[4] = SHA256('57' ‖ nonce) = 1f76aeab2200b46e0d6ad9ebf4e41abb...
-    leaf[5] = SHA256('86' ‖ nonce) = b6eb83970409c3b0ba5abf3ecf25b541...
-    leaf[6] = SHA256('121' ‖ nonce) = 66cbc46a3b26f9fe02ebc1883b290a36...
+    leaf[0] = SHA256('1' ‖ nonce) = 381963bc9a6a3d54159512265368d120...
+    leaf[1] = SHA256('6' ‖ nonce) = 43607786afc393ac42b58dd1e6dd9c32...
+    leaf[2] = SHA256('17' ‖ nonce) = 7e694a34e4853d3a38478605bb8f5502...
+    leaf[3] = SHA256('34' ‖ nonce) = bfc7117793f81f93710c0123bb3e9b52...
+    leaf[4] = SHA256('57' ‖ nonce) = dde0a9800a6f45e403313479a0da368a...
+    leaf[5] = SHA256('86' ‖ nonce) = e90226e0f296fa18ad7280188e92c822...
+    leaf[6] = SHA256('121' ‖ nonce) = e60d260fcf12f1d4a5f26ec8b62bb621...
 
   Step 3 — Build Merkle tree:
     Padded leaf count : 8  (next power of 2 ≥ 7)
     Number of levels  : 3
 
     ── Leaf level (level 3, 8 nodes) ──
-      [ 0] = 527602fa9618144e28a216ea84225b41f03ca79ecfbf4707...  [real]
-      [ 1] = 99b6289ffccd0cc61cba62559d9635491d416cc1c8338736...  [real]
-      [ 2] = 2f61048fa29bf041be8215c6ec7d3211caac438c738fd814...  [real]
-      [ 3] = ab18ee3379dd4d9da887f132f6fb35cee52104c5224b8584...  [real]
-      [ 4] = 1f76aeab2200b46e0d6ad9ebf4e41abb826992bcafb419e8...  [real]
-      [ 5] = b6eb83970409c3b0ba5abf3ecf25b54131935ec90ba26ae4...  [real]
-      [ 6] = 66cbc46a3b26f9fe02ebc1883b290a3644bcb7b8269fd214...  [real]
+      [ 0] = 381963bc9a6a3d54159512265368d12044656792a756f91e...  [real]
+      [ 1] = 43607786afc393ac42b58dd1e6dd9c327d8366a1349b63df...  [real]
+      [ 2] = 7e694a34e4853d3a38478605bb8f5502ae83ccf78dfa9101...  [real]
+      [ 3] = bfc7117793f81f93710c0123bb3e9b520ba33bef55d5db45...  [real]
+      [ 4] = dde0a9800a6f45e403313479a0da368ae4dd9fe180959879...  [real]
+      [ 5] = e90226e0f296fa18ad7280188e92c8225d48d58e54e92290...  [real]
+      [ 6] = e60d260fcf12f1d4a5f26ec8b62bb62173f825b118d7dac7...  [real]
       [ 7] = 000000000000000000000000000000000000000000000000...  [padding]
     ── Level 2 (4 nodes) ──
-      [ 4] = 6ff56f8d208c9a460adf68a88bb646b1c987e0320ccdc3a8...
-      [ 5] = a97328f6fc22a862c9e1f8f27898fdf99490be7fdaecfb7a...
-      [ 6] = 4bddefaf274a4ab1aa5c75240a2cee7bd3fe3da51a8963cd...
-      [ 7] = a5f8943a650bb72ab405c8e374f546356907558842a8d011...
+      [ 4] = a58b48f728153367d93b77dcaf49f8abf68652d93ebf8af8...
+      [ 5] = 5fd5c1d437e08a6df6addf5100bf59cf3c442b17c49a3fc2...
+      [ 6] = dc499b61948f3398ecd2db5963d8bccafd7b654747b6bc63...
+      [ 7] = fd10be13f0b0d5f4c6244e02506f3c5cf7e974f7f8698192...
     ── Level 1 (2 nodes) ──
-      [ 2] = 8be3320b610b1a45c64fc155aa8101986916df87a6c4c2a5...
-      [ 3] = 18305fe105f936fddee9e308c82ceb8caaad3538e80d277e...
+      [ 2] = 6330108c14b6d141635a356299481b2aaa8553bb98cc1310...
+      [ 3] = 823f384506a54447d4c14a6abe79398d69dc40c6bd0150ad...
     ── Root (level 0) ──
-      root = 190762463e0c7bef9f873b729ecaa28c7a0f90e6dec9c44a48c4e1306f941850
+      root = 546c34675f4fadc65fcd47d2d4df799e5f23f36bc8287c3c4789418e1d7930f0
 
-  Commitment root  :  190762463e0c7bef9f873b729ecaa28c7a0f90e6dec9c44a48c4e1306f941850
+  Commitment root  :  546c34675f4fadc65fcd47d2d4df799e5f23f36bc8287c3c4789418e1d7930f0
   Root size        :  32 bytes  (SHA-256 output, fixed)
-  Commit time      :  9.54 µs
+  Commit time      :  7.42 µs
   Proof size (open):  3 × 32 = 96 bytes  (Merkle path)
 ──────────────────────────────────────────────────────────────────
 
@@ -460,11 +460,11 @@
 ──────────────────────────────────────────────────────────────────
   PC.Verify  [Recompute and compare Merkle root]
 ──────────────────────────────────────────────────────────────────
-  Recomputed root  :  190762463e0c7bef9f873b729ecaa28c7a0f90e6dec9c44a48c4e1306f941850
-  Committed root   :  190762463e0c7bef9f873b729ecaa28c7a0f90e6dec9c44a48c4e1306f941850
+  Recomputed root  :  546c34675f4fadc65fcd47d2d4df799e5f23f36bc8287c3c4789418e1d7930f0
+  Committed root   :  546c34675f4fadc65fcd47d2d4df799e5f23f36bc8287c3c4789418e1d7930f0
   Match            :  True
   PC.Verify        :  1  ← VALID ✓
-  Verify time      :  8.25 µs
+  Verify time      :  7.00 µs
 ──────────────────────────────────────────────────────────────────
 
   ── PC.BatchOpen ─────────────────────────────────────────────────
@@ -478,24 +478,24 @@
   ── x = 1 (index 1) ──
     y = g(1) = 6
     Merkle path (3 hashes, 96 bytes):
-      path[0] = 527602fa9618144e28a216ea84225b41f03ca79ecfbf470713a5618ebaf47528
-      path[1] = a97328f6fc22a862c9e1f8f27898fdf99490be7fdaecfb7a7dbd8847ed5039ba
-      path[2] = 18305fe105f936fddee9e308c82ceb8caaad3538e80d277e9fc3c57c07963a17
+      path[0] = 381963bc9a6a3d54159512265368d12044656792a756f91eccaaca9b5b06c9e8
+      path[1] = 5fd5c1d437e08a6df6addf5100bf59cf3c442b17c49a3fc21273dd20b82c2d72
+      path[2] = 823f384506a54447d4c14a6abe79398d69dc40c6bd0150ad1cbf6206d3c029f1
   ── x = 2 (index 2) ──
     y = g(2) = 17
     Merkle path (3 hashes, 96 bytes):
-      path[0] = ab18ee3379dd4d9da887f132f6fb35cee52104c5224b8584c550f01d134c64d7
-      path[1] = 6ff56f8d208c9a460adf68a88bb646b1c987e0320ccdc3a86d98bee2e76e9889
-      path[2] = 18305fe105f936fddee9e308c82ceb8caaad3538e80d277e9fc3c57c07963a17
+      path[0] = bfc7117793f81f93710c0123bb3e9b520ba33bef55d5db4563eca021bb684b9e
+      path[1] = a58b48f728153367d93b77dcaf49f8abf68652d93ebf8af8ca8af67db1e2f2d2
+      path[2] = 823f384506a54447d4c14a6abe79398d69dc40c6bd0150ad1cbf6206d3c029f1
   ── x = 4 (index 4) ──
     y = g(4) = 57
     Merkle path (3 hashes, 96 bytes):
-      path[0] = b6eb83970409c3b0ba5abf3ecf25b54131935ec90ba26ae4decb15a605e92805
-      path[1] = a5f8943a650bb72ab405c8e374f546356907558842a8d011d1d20986b502e32b
-      path[2] = 8be3320b610b1a45c64fc155aa8101986916df87a6c4c2a518332972ae9dff88
+      path[0] = e90226e0f296fa18ad7280188e92c8225d48d58e54e92290cbd15aae2e1d0505
+      path[1] = fd10be13f0b0d5f4c6244e02506f3c5cf7e974f7f869819214e8ac4b176ac066
+      path[2] = 6330108c14b6d141635a356299481b2aaa8553bb98cc131031d99f77f1541bdf
 
   Total batch proof size :  288 bytes  (3 openings × 96 bytes each)
-  BatchOpen time         :  13.33 µs
+  BatchOpen time         :  11.63 µs
 ──────────────────────────────────────────────────────────────────
 
   ── PC.BatchCheck ────────────────────────────────────────────────
@@ -503,24 +503,24 @@
 ──────────────────────────────────────────────────────────────────
   PC.BatchCheck  [Verify all batch evaluation proofs]
 ──────────────────────────────────────────────────────────────────
-  x= 1 (idx 1), y=   6: PASS ✓   root = 190762463e0c7bef9f873b729ecaa28c...
-  x= 2 (idx 2), y=  17: PASS ✓   root = 190762463e0c7bef9f873b729ecaa28c...
-  x= 4 (idx 4), y=  57: PASS ✓   root = 190762463e0c7bef9f873b729ecaa28c...
+  x= 1 (idx 1), y=   6: PASS ✓   root = 546c34675f4fadc65fcd47d2d4df799e...
+  x= 2 (idx 2), y=  17: PASS ✓   root = 546c34675f4fadc65fcd47d2d4df799e...
+  x= 4 (idx 4), y=  57: PASS ✓   root = 546c34675f4fadc65fcd47d2d4df799e...
 
   BatchCheck result  :  1  ← ALL PROOFS VALID ✓
-  BatchCheck time    :  12.92 µs
+  BatchCheck time    :  10.83 µs
 ──────────────────────────────────────────────────────────────────
 
   ────────────────────────────────────────────────────────────────
   SESSION F RESULT:
     Polynomial     :  g(X) = 1 + 2X + 3X²
-    Commitment     :  190762463e0c7bef9f873b729ecaa28c7a0f90e6dec9c44a48c4e1306f941850
+    Commitment     :  546c34675f4fadc65fcd47d2d4df799e5f23f36bc8287c3c4789418e1d7930f0
     Eval points    :  [1, 2, 4]  (domain points [1, 2, 4])
     Evaluations    :  [6, 17, 57]
     Total proof    :  288 bytes
     BatchCheck     :  1  ← ALL BATCH PROOFS VALID ✓
-    BatchOpen time :  13.33 µs
-    BatchCheck time:  12.92 µs
+    BatchOpen time :  11.63 µs
+    BatchCheck time:  10.83 µs
     Batch proof sz :  288 bytes  (3 Merkle paths)
 
   ██████████████████████████████████████████████████████████████████
@@ -535,14 +535,14 @@
   ══════════════════════════════════════════════════════════════════════
   Parameter                  | KZG (Part 1)             | FRI+Poseidon (Part 2)
   ───────────────────────────┼──────────────────────────┼─────────────────────────────
-  PC.Setup time              | 70.04 µs                 | 15.67 µs
-  PC.Commit time             | ~70 µs (0.07 ms)         | 70.54 µs
-  PC.Verify time             | ~70 µs (est.)            | 16.17 µs
-  PC.Open time               | < 0.1 ms (est.)          | 6.79 µs
-  PC.Check (honest)          | < 0.1 ms (est.)          | 17.92 µs
-  PC.Check (forged)          | PASS — forgery accepted  | 12.00 µs — REJECTED
-  PC.BatchOpen time          | < 0.1 ms (est.)          | 13.33 µs
-  PC.BatchCheck time         | < 0.1 ms (est.)          | 12.92 µs
+  PC.Setup time              | 70.04 µs                 | 3.37 µs
+  PC.Commit time             | ~70 µs (0.07 ms)         | 19.96 µs
+  PC.Verify time             | ~70 µs (est.)            | 8.67 µs
+  PC.Open time               | < 0.1 ms (est.)          | 1.25 µs
+  PC.Check (honest)          | < 0.1 ms (est.)          | 12.00 µs
+  PC.Check (forged)          | PASS — forgery accepted  | 10.75 µs — REJECTED
+  PC.BatchOpen time          | < 0.1 ms (est.)          | 11.63 µs
+  PC.BatchCheck time         | < 0.1 ms (est.)          | 10.83 µs
   ───────────────────────────┼──────────────────────────┼─────────────────────────────
   Commitment size            | 64 bytes (ECC point)     | 32 bytes (hash root)
   Single proof size          | 64 bytes (ECC point)     | 96 bytes (3 × 32)
@@ -636,39 +636,39 @@
   Running KZG operations silently...
 
   KZG timings captured:
-    PC.Setup         :  219.00 µs
-    PC.Commit        :  30.50 µs
-    PC.Verify        :  14.79 µs
-    PC.Open          :  8.92 µs
-    PC.Check (honest):  15.87 µs
-    PC.Check (forged):  54.58 µs  ← forgery ACCEPTED
-    PC.BatchOpen     :  155.00 µs
-    PC.BatchCheck    :  182.67 µs
-    BSGS attack      :  74.7404 ms  (τ=428 RECOVERED ✓)
+    PC.Setup         :  182.00 µs
+    PC.Commit        :  23.33 µs
+    PC.Verify        :  10.87 µs
+    PC.Open          :  7.17 µs
+    PC.Check (honest):  12.83 µs
+    PC.Check (forged):  14.46 µs  ← forgery ACCEPTED
+    PC.BatchOpen     :  59.46 µs
+    PC.BatchCheck    :  49.88 µs
+    BSGS attack      :  46.1779 ms  (τ=428 RECOVERED ✓)
 
   FRI timings reused from Sessions A–F:
-    PC.Setup         :  15.67 µs
-    PC.Commit        :  70.54 µs
-    PC.Verify        :  16.17 µs
-    PC.Open          :  6.79 µs
-    PC.Check (honest):  17.92 µs
-    PC.Check (forged):  12.00 µs  ← forgery REJECTED
-    PC.BatchOpen     :  13.33 µs
-    PC.BatchCheck    :  12.92 µs
+    PC.Setup         :  3.37 µs
+    PC.Commit        :  19.96 µs
+    PC.Verify        :  8.67 µs
+    PC.Open          :  1.25 µs
+    PC.Check (honest):  12.00 µs
+    PC.Check (forged):  10.75 µs  ← forgery REJECTED
+    PC.BatchOpen     :  11.63 µs
+    PC.BatchCheck    :  10.83 µs
 
   ══════════════════════════════════════════════════════════════════════════
   TABLE 1: Performance  (all times in µs, same machine, same run)
   ══════════════════════════════════════════════════════════════════════════
   Operation            | KZG (measured)         | FRI+Poseidon (measured)
   ─────────────────────┼────────────────────────┼─────────────────────────────
-  PC.Setup             | 219.00 µs              | 15.67 µs
-  PC.Commit            | 30.50 µs               | 70.54 µs
-  PC.Verify            | 14.79 µs               | 16.17 µs
-  PC.Open              | 8.92 µs                | 6.79 µs
-  PC.Check (honest)    | 15.87 µs               | 17.92 µs
-  PC.Check (forged)    | 54.58 µs  [ACCEPTED]   | 12.00 µs  [REJECTED]
-  PC.BatchOpen         | 155.00 µs              | 13.33 µs
-  PC.BatchCheck        | 182.67 µs              | 12.92 µs
+  PC.Setup             | 182.00 µs              | 3.37 µs
+  PC.Commit            | 23.33 µs               | 19.96 µs
+  PC.Verify            | 10.87 µs               | 8.67 µs
+  PC.Open              | 7.17 µs                | 1.25 µs
+  PC.Check (honest)    | 12.83 µs               | 12.00 µs
+  PC.Check (forged)    | 14.46 µs  [ACCEPTED]   | 10.75 µs  [REJECTED]
+  PC.BatchOpen         | 59.46 µs               | 11.63 µs
+  PC.BatchCheck        | 49.88 µs               | 10.83 µs
   ─────────────────────┼────────────────────────┼─────────────────────────────
 
   ══════════════════════════════════════════════════════════════════════════
@@ -679,22 +679,22 @@
   Trusted setup        | Required               | ELIMINATED
   Commitment size      | 64 bytes (prod. ECC)   | 32 bytes (hash root)
   Single proof size    | 64 bytes (ECC point)   | 96 bytes (3 × 32 Merkle)
-  BSGS attack          | τ=428 in 74.7404 ms    | FAILED — no group structure
+  BSGS attack          | τ=428 in 46.1779 ms    | FAILED — no group structure
   Forgery result       | ACCEPTED (broken)      | REJECTED (secure)
   Post-quantum bits    | 0 bits (Shor's breaks) | 128 bits (Grover bound)
   ─────────────────────┼────────────────────────┼─────────────────────────────
 
   OBSERVATIONS:
 
-    • Setup:   KZG = 219.00 µs,  FRI = 15.67 µs
+    • Setup:   KZG = 182.00 µs,  FRI = 3.37 µs
                FRI is faster (no ECC scalar mults, just os.urandom + list creation)
-    • Commit:  KZG = 30.50 µs,  FRI = 70.54 µs
+    • Commit:  KZG = 23.33 µs,  FRI = 19.96 µs
                FRI uses SHA-256 hashing + Merkle tree construction
                KZG uses ECC scalar multiplications (O(log τ) point ops)
-    • Open:    KZG = 8.92 µs,  FRI = 6.79 µs
+    • Open:    KZG = 7.17 µs,  FRI = 1.25 µs
                FRI extracts a Merkle path (array indexing, no crypto ops)
                KZG performs polynomial division + ECC scalar mult
-    • BSGS:    KZG τ=428 recovered in 74.7404 ms — BROKEN
+    • BSGS:    KZG τ=428 recovered in 46.1779 ms — BROKEN
                FRI root is bytes → bsgs() raises ValueError — SECURE
     • Forgery: KZG Check(fake c, y=99) → 1 (ACCEPTED — broken scheme)
                FRI Check(fake leaf, y=99) → 0 (REJECTED — secure)
@@ -707,7 +707,7 @@
     Replacing KZG with FRI in Artemis eliminates ALL quantum attack surfaces.
   ────────────────────────────────────────────────────────────────
   SESSION H RESULT:
-    KZG BSGS attack   :  τ = 428  recovered in 74.7404 ms  (✓ CONFIRMED)
+    KZG BSGS attack   :  τ = 428  recovered in 46.1779 ms  (✓ CONFIRMED)
     KZG forgery check :  ACCEPTED (1) — scheme broken
     FRI forgery check :  REJECTED (0) — scheme secure
     Measurement basis :  live, same machine, same Python process
@@ -715,14 +715,14 @@
   ══════════════════════════════════════════════════════════════════
   ═                                                                ═
   ═   PART 2 DEMO COMPLETE                                     ═
-  ═   Session A (Setup)         :    0.12 ms                   ═
-  ═   Session B (Commit)        :    0.99 ms                   ═
-  ═   Session C (Open + Check)  :    0.07 ms                   ═
-  ═   Session D (BSGS attempt)  :    0.09 ms  ← FAILED         ═
-  ═   Session E (Forgery)       :    0.04 ms                   ═
-  ═   Session F (Batch)         :    0.12 ms                   ═
-  ═   Session H (Live compare)  :   75.59 ms                   ═
-  ═   Total runtime             :   77.69 ms                   ═
+  ═   Session A (Setup)         :    0.03 ms                   ═
+  ═   Session B (Commit)        :    0.11 ms                   ═
+  ═   Session C (Open + Check)  :    0.03 ms                   ═
+  ═   Session D (BSGS attempt)  :    0.06 ms  ← FAILED         ═
+  ═   Session E (Forgery)       :    0.03 ms                   ═
+  ═   Session F (Batch)         :    0.10 ms                   ═
+  ═   Session H (Live compare)  :   46.64 ms                   ═
+  ═   Total runtime             :   47.27 ms                   ═
   ═   Output saved: results/part2_kzg32bit_output.txt         ═
   ═                                                                ═
   ══════════════════════════════════════════════════════════════════
