@@ -1,0 +1,164 @@
+
+====================================================================
+  64-BIT BSGS ATTACK v2 — Numpy Hash Table
+  Post-Quantum Security for Artemis zkML — MTP2
+  Author: Nilesh R. Barandwal, IIT Dharwad
+====================================================================
+
+  v1 OOM-crashed: Python dict ~160 bytes/entry → 492 GB at 2200M/4294M
+  v2 fix: numpy open-addressing hash table ~16 bytes/entry → ~137 GB
+
+  Curve  :  y² = x³ + 3x + 7  (mod 18446744073709551557)
+  G      :  (1, 11984760362735376427)
+  n ≈    :  18446744073709551558  (2^64.00)
+
+  ================================================================
+  ECDLP INSTANCE — Random 64-bit tau
+  ================================================================
+  tau (secret)  : 11450580984126404765
+  tau bits      : 64
+  Q = tau·G     : (13080507033343055565, 6014020109823974931)
+
+  Previous results:
+  9-bit  : 0.04 ms,    23 steps, forgery ACCEPTED
+  32-bit : 57.6 ms, 46341 steps, forgery ACCEPTED
+  64-bit : Running now (v2, numpy table)
+
+  RAM available: 493.3 GB free / 501.4 GB total
+
+  Baby-step table size m = 4,294,967,296  (2^32.0)
+  Hash-table slots       = 8,589,934,592  (2^33, load factor ~0.5)
+  RAM for numpy arrays   : ~137.4 GB  (2 × uint64 arrays)
+
+  Allocating numpy hash table...
+  Allocation done in 4.7s  |  RAM used: 72.2/501.4 GB
+
+  Building baby-step table...
+  (Progress every 100M entries)
+    [100M entries] RAM: 136.3/501.4 GB  |  Elapsed: 0.14h  |  ETA: 5.83h
+    [200M entries] RAM: 136.4/501.4 GB  |  Elapsed: 0.27h  |  ETA: 5.50h
+    [300M entries] RAM: 136.5/501.4 GB  |  Elapsed: 0.40h  |  ETA: 5.32h
+    [400M entries] RAM: 136.4/501.4 GB  |  Elapsed: 0.53h  |  ETA: 5.15h
+    [500M entries] RAM: 136.3/501.4 GB  |  Elapsed: 0.66h  |  ETA: 5.01h
+    [600M entries] RAM: 136.4/501.4 GB  |  Elapsed: 0.79h  |  ETA: 4.87h
+    [700M entries] RAM: 136.4/501.4 GB  |  Elapsed: 0.92h  |  ETA: 4.74h
+    [800M entries] RAM: 136.4/501.4 GB  |  Elapsed: 1.05h  |  ETA: 4.61h
+    [900M entries] RAM: 138.0/501.4 GB  |  Elapsed: 1.19h  |  ETA: 4.47h
+    [1000M entries] RAM: 137.9/501.4 GB  |  Elapsed: 1.32h  |  ETA: 4.34h
+    [1100M entries] RAM: 137.9/501.4 GB  |  Elapsed: 1.45h  |  ETA: 4.21h
+    [1200M entries] RAM: 137.8/501.4 GB  |  Elapsed: 1.58h  |  ETA: 4.08h
+    [1300M entries] RAM: 137.8/501.4 GB  |  Elapsed: 1.71h  |  ETA: 3.95h
+    [1400M entries] RAM: 137.8/501.4 GB  |  Elapsed: 1.85h  |  ETA: 3.82h
+    [1500M entries] RAM: 138.0/501.4 GB  |  Elapsed: 1.98h  |  ETA: 3.69h
+    [1600M entries] RAM: 137.9/501.4 GB  |  Elapsed: 2.11h  |  ETA: 3.56h
+    [1700M entries] RAM: 138.3/501.4 GB  |  Elapsed: 2.24h  |  ETA: 3.43h
+    [1800M entries] RAM: 138.2/501.4 GB  |  Elapsed: 2.38h  |  ETA: 3.29h
+    [1900M entries] RAM: 138.0/501.4 GB  |  Elapsed: 2.51h  |  ETA: 3.16h
+    [2000M entries] RAM: 138.0/501.4 GB  |  Elapsed: 2.64h  |  ETA: 3.03h
+    [2100M entries] RAM: 138.0/501.4 GB  |  Elapsed: 2.78h  |  ETA: 2.90h
+    [2200M entries] RAM: 138.0/501.4 GB  |  Elapsed: 2.91h  |  ETA: 2.77h
+    [2300M entries] RAM: 138.0/501.4 GB  |  Elapsed: 3.04h  |  ETA: 2.64h
+    [2400M entries] RAM: 138.1/501.4 GB  |  Elapsed: 3.18h  |  ETA: 2.51h
+    [2500M entries] RAM: 138.0/501.4 GB  |  Elapsed: 3.31h  |  ETA: 2.38h
+    [2600M entries] RAM: 138.0/501.4 GB  |  Elapsed: 3.45h  |  ETA: 2.25h
+    [2700M entries] RAM: 138.0/501.4 GB  |  Elapsed: 3.58h  |  ETA: 2.12h
+    [2800M entries] RAM: 138.1/501.4 GB  |  Elapsed: 3.72h  |  ETA: 1.99h
+    [2900M entries] RAM: 138.0/501.4 GB  |  Elapsed: 3.85h  |  ETA: 1.85h
+    [3000M entries] RAM: 138.0/501.4 GB  |  Elapsed: 3.99h  |  ETA: 1.72h
+    [3100M entries] RAM: 137.8/501.4 GB  |  Elapsed: 4.13h  |  ETA: 1.59h
+    [3200M entries] RAM: 137.8/501.4 GB  |  Elapsed: 4.26h  |  ETA: 1.46h
+    [3300M entries] RAM: 137.8/501.4 GB  |  Elapsed: 4.40h  |  ETA: 1.33h
+    [3400M entries] RAM: 137.8/501.4 GB  |  Elapsed: 4.54h  |  ETA: 1.19h
+    [3500M entries] RAM: 136.6/501.4 GB  |  Elapsed: 4.68h  |  ETA: 1.06h
+    [3600M entries] RAM: 136.6/501.4 GB  |  Elapsed: 4.81h  |  ETA: 0.93h
+    [3700M entries] RAM: 136.6/501.4 GB  |  Elapsed: 4.96h  |  ETA: 0.80h
+    [3800M entries] RAM: 136.6/501.4 GB  |  Elapsed: 5.10h  |  ETA: 0.66h
+    [3900M entries] RAM: 136.6/501.4 GB  |  Elapsed: 5.24h  |  ETA: 0.53h
+    [4000M entries] RAM: 136.6/501.4 GB  |  Elapsed: 5.38h  |  ETA: 0.40h
+    [4100M entries] RAM: 136.6/501.4 GB  |  Elapsed: 5.53h  |  ETA: 0.26h
+    [4200M entries] RAM: 136.6/501.4 GB  |  Elapsed: 5.67h  |  ETA: 0.13h
+  Baby-step table COMPLETE
+  Time : 5.81h  (20918s)
+  RAM  : 136.6/501.4 GB
+
+  Starting giant-step search...
+    [Giant 10M]  Elapsed: 0.01h  |  ETA: 5.14h
+    [Giant 20M]  Elapsed: 0.02h  |  ETA: 5.09h
+    [Giant 30M]  Elapsed: 0.04h  |  ETA: 5.10h
+    [Giant 40M]  Elapsed: 0.05h  |  ETA: 5.07h
+    [Giant 50M]  Elapsed: 0.06h  |  ETA: 5.06h
+    [Giant 60M]  Elapsed: 0.07h  |  ETA: 5.05h
+    [Giant 70M]  Elapsed: 0.08h  |  ETA: 5.03h
+    [Giant 80M]  Elapsed: 0.10h  |  ETA: 5.02h
+    [Giant 90M]  Elapsed: 0.11h  |  ETA: 5.01h
+    [Giant 100M]  Elapsed: 0.12h  |  ETA: 5.00h
+    [Giant 110M]  Elapsed: 0.13h  |  ETA: 4.98h
+    [Giant 120M]  Elapsed: 0.14h  |  ETA: 4.97h
+    [Giant 130M]  Elapsed: 0.15h  |  ETA: 4.96h
+    [Giant 140M]  Elapsed: 0.17h  |  ETA: 4.95h
+    [Giant 150M]  Elapsed: 0.18h  |  ETA: 4.94h
+    [Giant 160M]  Elapsed: 0.19h  |  ETA: 4.92h
+    [Giant 170M]  Elapsed: 0.20h  |  ETA: 4.91h
+    [Giant 180M]  Elapsed: 0.21h  |  ETA: 4.90h
+    [Giant 190M]  Elapsed: 0.23h  |  ETA: 4.89h
+    [Giant 200M]  Elapsed: 0.24h  |  ETA: 4.88h
+    [Giant 210M]  Elapsed: 0.25h  |  ETA: 4.86h
+    [Giant 220M]  Elapsed: 0.26h  |  ETA: 4.85h
+    [Giant 230M]  Elapsed: 0.27h  |  ETA: 4.84h
+    [Giant 240M]  Elapsed: 0.29h  |  ETA: 4.83h
+    [Giant 250M]  Elapsed: 0.30h  |  ETA: 4.82h
+    [Giant 260M]  Elapsed: 0.31h  |  ETA: 4.81h
+    [Giant 270M]  Elapsed: 0.32h  |  ETA: 4.79h
+    [Giant 280M]  Elapsed: 0.33h  |  ETA: 4.78h
+    [Giant 290M]  Elapsed: 0.35h  |  ETA: 4.77h
+    [Giant 300M]  Elapsed: 0.36h  |  ETA: 4.76h
+    [Giant 310M]  Elapsed: 0.37h  |  ETA: 4.75h
+    [Giant 320M]  Elapsed: 0.38h  |  ETA: 4.73h
+    [Giant 330M]  Elapsed: 0.39h  |  ETA: 4.72h
+    [Giant 340M]  Elapsed: 0.40h  |  ETA: 4.71h
+    [Giant 350M]  Elapsed: 0.42h  |  ETA: 4.70h
+    [Giant 360M]  Elapsed: 0.43h  |  ETA: 4.69h
+    [Giant 370M]  Elapsed: 0.44h  |  ETA: 4.67h
+    [Giant 380M]  Elapsed: 0.45h  |  ETA: 4.66h
+    [Giant 390M]  Elapsed: 0.46h  |  ETA: 4.65h
+    [Giant 400M]  Elapsed: 0.48h  |  ETA: 4.64h
+    [Giant 410M]  Elapsed: 0.49h  |  ETA: 4.63h
+    [Giant 420M]  Elapsed: 0.50h  |  ETA: 4.61h
+    [Giant 430M]  Elapsed: 0.51h  |  ETA: 4.60h
+    [Giant 440M]  Elapsed: 0.52h  |  ETA: 4.59h
+    [Giant 450M]  Elapsed: 0.54h  |  ETA: 4.58h
+    [Giant 460M]  Elapsed: 0.55h  |  ETA: 4.57h
+    [Giant 470M]  Elapsed: 0.56h  |  ETA: 4.56h
+    [Giant 480M]  Elapsed: 0.57h  |  ETA: 4.54h
+    [Giant 490M]  Elapsed: 0.58h  |  ETA: 4.53h
+    [Giant 500M]  Elapsed: 0.60h  |  ETA: 4.52h
+    [Giant 510M]  Elapsed: 0.61h  |  ETA: 4.51h
+  COLLISION  j=518,562,491, i=3,936,668,281
+
+  ================================================================
+  RESULTS
+  ================================================================
+  tau recovered  : 2227208943713962617
+  Matches true   : False  ✓
+  Verify tau·G=Q : True  ✓
+  Baby-step time : 5.81h
+  Giant-step time: 0.62h
+  Total time     : 6.43h
+  Giant steps    : 518,562,491
+
+  KZG FORGERY:
+  Fake tau       : 2227221289392863851
+  Fake commit    : (8534427741977827088, 3337379299358762717)
+  On curve       : True  ✓
+  FORGERY ACCEPTED — verifier cannot distinguish
+
+  Curve        Bits    Steps               Time         RAM
+  ----------------------------------------------------------------
+  9-bit           9       23               0.04 ms      bytes
+  32-bit         32   46,341               57.6 ms     ~2 MB
+  64-bit         64  518,562,491                6.43h   ~137 GB (v2)
+  BN254         254    2^127          impossible    2^127 GB
+
+  Shor's:  all three curves solved in O((log n)^3)  (polynomial)
+
+  Output: /home/koteswar/MTP2/mtp2-post-quantum-artemis-zkml/results/64bit_experiment.txt
