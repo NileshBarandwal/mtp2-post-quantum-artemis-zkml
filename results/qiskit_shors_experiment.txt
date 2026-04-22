@@ -1,0 +1,524 @@
+
+====================================================================
+  SHOR'S ALGORITHM — KZG Forgery via Quantum ECDLP
+  Post-Quantum Security for Artemis zkML — MTP2
+  Author: Nilesh R. Barandwal, IIT Dharwad
+====================================================================
+
+  PIPELINE (mirrors bsgs_attack_kzg_full.py — Step 4 replaced):
+    1. Train MNIST MLPClassifier(128,64) → extract integer weights
+    2. Build SRS = [G, τG, τ²G, …] with random 64-bit τ
+    3. Commit real MNIST weights: C_real = Σ wᵢ · SRS[i]
+   3b. PC.Verify  — Definition 2.2, Op 3
+   3c. PC.Open    — Definition 2.2, Op 4
+   3d. PC.Check   — Definition 2.2, Op 5 (honest)
+   3e. PC.Check   — Definition 2.2, Op 5 (tampered)
+   3f. PC.BatchOpen  — Definition 2.2, Op 6
+   3g. PC.BatchCheck — Definition 2.2, Op 7
+    4. *** SHOR'S ALGORITHM *** → recover τ_sub from small subgroup
+    5. Forge commitment with recovered τ
+  FRI. All 7 FRI PC operations — Shor's fails (no group structure)
+
+  Curve  :  y² = x³ + 7800851958821274545x + 3032140762713616321  (mod 12543974025918169487)
+  G      :  (9288838633539720391, 2052742288688552359)
+  n      :  12543974020049812861  (2^63.44)  ← PRIME, exact (h=1)
+
+  RAM available: 491.6 GB free / 501.4 GB total
+
+  τ (secret)      : 9422318653889560067  (64 bits)
+  Q = τG = SRS[1] : (9129902419393540222, 5073090480770511888)
+  Shor's goal     : recover τ_sub = τ mod 251 from small subgroup
+
+  Evaluation points (field elements < n):
+    eval_points[0] = 9983871061428742458  (64 bits)
+    eval_points[1] = 183020837314184911  (58 bits)
+    eval_points[2] = 119283941542732850  (57 bits)
+
+  ================================================================
+  STEP 1 — Train MNIST MLPClassifier(128, 64)
+  ================================================================
+  Loading MNIST...
+  Loaded 70000 samples, 784 features  (15.7s)
+  Training MLPClassifier(hidden_layer_sizes=(128, 64))...
+  Training done in 14.7s
+  Test accuracy : 96.93%
+  Total weight+bias params : 109,386
+  Scale factor             : 1000000  (float × 1000000 → int)
+  Sample weights[0:5]      : [134936, -84348, -27143, 49273, -87859]
+  Non-zero weights in first 1000: 202
+
+  [Step 1 done in 32.4s]
+
+  ================================================================
+  STEP 2 — Build SRS (Structured Reference String)
+  ================================================================
+  τ  = 9422318653889560067  (same tau used as Shor's target)
+  D  = 1000  (degree = min(len(weights), 1000))
+  SRS = [G, τG, τ²G, …, τᴰG]  (1001 points total)
+  SRS built in 0.32s
+  SRS[0] = G       = (9288838633539720391, 2052742288688552359)
+  SRS[1] = τG      = (9129902419393540222, 5073090480770511888)
+  SRS[2] = τ²G     = (9772424597458379062, 3947780943161088301)
+
+  [Step 2 done in 0.3s]
+
+  ================================================================
+  STEP 3 — KZG Commitment to Real MNIST Weights
+  ================================================================
+  C_real = w[0]·G + w[1]·τG + … + w[999]·τ^999·G
+  Using D = 1000 weights
+  Commitment computed in 0.05s
+  C_real = (7504917395570725233, 7608340775988512878)
+  On curve : True  ✓
+  This single ECC point commits to all 1000 real MNIST weights.
+
+  [Step 3 done in 0.0s]
+
+  ================================================================
+  STEP 3b — PC.Verify  [Definition 2.2, Op 3]
+  ================================================================
+  Recomputing C from weights and SRS to verify commitment...
+  Recomputed C == C_real : True
+  PC.Verify : 1 ← VALID ✓
+  [Step 3b done in 0.05s]
+
+  ================================================================
+  STEP 3c — PC.Open  [Definition 2.2, Op 4]
+  ================================================================
+  Opening polynomial at 3 large evaluation points...
+  PC.Open(x=9983871061428742458): y=8614091462145311702, pi=(7387229582786052765, 10736909705241822041)
+  PC.Open(x=183020837314184911): y=3352202137870045509, pi=(11758048063991394571, 9556259743329854876)
+  PC.Open(x=119283941542732850): y=2938348637837879852, pi=(8071471661361190584, 9295764233991702495)
+  [Step 3c done in 0.18s]
+
+  ================================================================
+  STEP 3d — PC.Check (honest)  [Definition 2.2, Op 5]
+  ================================================================
+  Verifying each opening proof against C_real...
+
+  NOTE: PC.Check here is an algebraic simulation of the bilinear
+  pairing check e(π,[τ−x]₂)=e(C−y·G,H). We use τ directly as
+  this is a demo; in production τ is destroyed and only the
+  pairing-based check is possible. See MTP2 Section 2 for details.
+
+  PC.Check(x=9983871061428742458): 1 ← PROOF VALID ✓
+  PC.Check(x=183020837314184911): 1 ← PROOF VALID ✓
+  PC.Check(x=119283941542732850): 1 ← PROOF VALID ✓
+  [Step 3d done in 0.00s]
+
+  ================================================================
+  STEP 3e — PC.Check (tamper test)  [Definition 2.2, Op 5]
+  ================================================================
+  Tampering with weight[42] += 1 and checking against C_real...
+
+  NOTE: Same algebraic simulation as Step 3d — verifier uses τ
+  directly. Tampered proof checked against original C_real → must be 0.
+
+  C_tampered (weight[42]+=1) = (11777772238636129020, 7620750606608075589)
+  C_real (original)          = (7504917395570725233, 7608340775988512878)
+  C_tampered == C_real       : False  (must be False ✓)
+
+  PC.Check (tampered weight[42]+=1): 0 ← TAMPERING DETECTED ✓
+  [Step 3e done in 0.11s]
+
+  ================================================================
+  STEP 3f — PC.BatchOpen  [Definition 2.2, Op 6]
+  ================================================================
+  Computing single batch proof for all 3 evaluation points...
+  Eval points Q   : [9983871061428742458, 183020837314184911, 119283941542732850]
+  Claimed ys      : [8614091462145311702, 3352202137870045509, 2938348637837879852]
+  Batch challenge : 910013679150187773
+  PC.BatchOpen: pi_batch=(8679956993303051605, 6755673607379558306)
+  [Step 3f done in 0.00s]
+
+  ================================================================
+  STEP 3g — PC.BatchCheck  [Definition 2.2, Op 7]
+  ================================================================
+  Verifying batch proof: Σ r^i(τ−x_i)·pi_i == Σ r^i(C−y_i·G) ...
+  Batch challenge r : 910013679150187773
+  LHS = Σ r^i(τ−x_i)·pi_i = (10769800660627227228, 1306706928816256245)
+  RHS = Σ r^i(C−y_i·G)    = (10769800660627227228, 1306706928816256245)
+  PC.BatchCheck: 1 ← ALL EVALUATIONS VALID ✓
+  [Step 3g done in 0.00s]
+
+
+══ KZG ALL 7 PC OPERATIONS COMPLETE ══
+PC.Setup     : ✓ tau=9422318653889560067 (64-bit), SRS[1]=(9129902419393540222, 5073090480770511888)
+PC.Commit    : ✓ C_real=(7504917395570725233, 7608340775988512878) — 1000 real MNIST weights
+PC.Verify    : 1 ✓
+PC.Open      : ✓ x=[9983871061428742458, 183020837314184911, 119283941542732850]
+PC.Check     : 1,1,1 ✓ (honest) | 0 ✓ (tampered)
+PC.BatchOpen : ✓ pi_batch=(8679956993303051605, 6755673607379558306)
+PC.BatchCheck: 1 ✓
+══ NOW RUNNING SHOR'S ALGORITHM ON SMALL SUBGROUP ══
+
+  ================================================================
+  STEP 4 — Shor's Algorithm: Recover τ from SRS[1] = τG
+  ================================================================
+
+  WHY A SMALL SUBGROUP:
+  Full 64-bit curve: N ≈ 2^63 → S=63 → 63+63+63 = 189 qubits
+  Statevector RAM   = 2^189 × 16 bytes → physically impossible.
+  Small subgroup:   N_sub = 251 (prime) → S=8 → 8+8+8 = 24 qubits
+  Statevector RAM   = 2^24 × 16 = 256 MB → safe on any hardware.
+  SAME CURVE (CURVE_A, CURVE_B, CURVE_P) — only working N differs.
+
+  Curve           :  y² = x³ + 7800851958821274545x + 3032140762713616321  (mod 12543974025918169487)
+  G_sub           :  (9288838633539720391, 2052742288688552359)  (same G as full curve)
+  N_sub           :  251  (prime — Shor's subgroup order)
+  τ_full          :  9422318653889560067  (full 64-bit secret)
+  τ_sub           :  22  = τ_full mod N_sub  (Shor's target)
+  Q_sub = τ_sub·G :  (7692295351504729003, 1506095306904761825)  (analogous to SRS[1])
+
+  Qubit budget:
+    S (control bits) = ceil(log2(251)) = 8
+    Y_BITS           = 8
+    Total qubits     = 8+8+8 = 24
+    Statevector RAM  = 2^24 × 16 = 268.4 MB
+
+  Building Shor's ECDLP circuit...
+  Circuit built in 0.21s
+  Gates : 50
+  Depth : 19
+
+  Circuit diagram (text):
+
+  [circuit.draw failed: 'Tee' object has no attribute 'encoding']
+
+  Running Qiskit Aer simulation (4096 shots)...
+  Trying simulator: statevector ...
+    statevector: SUCCESS  (3.98s, 4096 shots)
+
+  Simulation complete
+  Simulator method :  statevector
+  Simulation time  :  3.98 seconds
+  Total shots      :  4096
+  Unique outcomes  :  1266
+
+  Top 20 measurement outcomes (j_b, j_a):
+  Bitstring               j_a    j_b   Count     τ candidate
+  ──────────────────────────────────────────────────────────────────
+  01101001 10011100       156    105      25    131  
+  00000000 00000000         0      0      23    — (j_a=0 or gcd≠1)
+  01100001 01101101       109     97      22    93  
+  01110000 00000101         5    112      21    173  
+  01100100 10111111       191    100      21    82  
+  00110100 01101011       107     52      21    160  
+  01100010 00110011        51     98      20    248  
+  10010110 10011110       158    150      20    217  
+  11000011 10100000       160    195      20    213  
+  11111001 10010111       151    249      19    246  
+  11001101 01011011        91    205      19    85  
+  11010011 11111110       254    211      19    154  
+  00000001 11000110       198      1      19    161  
+  10011110 11001101       205    158      18    193  
+  01011100 10010000       144     92      18    161  
+  11111110 01110100       116    254      18    145  
+  11010010 00111000        56    210      18    192  
+  10100110 11111100       252    166      17    166  
+  10100101 00110110        54    165      17    17  
+  01110001 11001011       203    113      16    97  
+  ──────────────────────────────────────────────────────────────────
+
+  Post-processing: τ_sub = j_b · j_a^{-1} (mod N_sub)
+
+  τ_sub RECOVERED :  22
+  From (j_a, j_b) :  (12, 13)  count=12
+  Verify          :  22·G_sub == Q_sub  →  True  ✓
+  Matches τ_sub   :  True  ✓
+
+  SCALING TO FULL CURVE (analytical — Roetteler et al. 2017):
+  64-bit curve : N ≈ 2^63 → ~189 qubits → 'hours' on quantum HW
+  BN254 (prod) : N ≈ 2^254 → ~2330 logical qubits → feasible
+  FRI          : no discrete log structure → Shor's CANNOT apply
+
+  [Step 4 done in 4.43s]
+
+  ================================================================
+  STEP 5 — KZG Forgery with Recovered τ
+  ================================================================
+  Recovered τ = 22
+
+  Real commitment   C_real   = (7504917395570725233, 7608340775988512878)
+  Fake commitment   C_fake   = (3900168934113360153, 1701819220873670253)  (f_fake(x)=1+42x)
+  Poison commitment C_poison = (2257499322626423643, 5609183222401382739)  (real weights, weight[0]+9999)
+
+  C_real   on curve : True
+  C_fake   on curve : True
+  C_poison on curve : True
+
+  WHY FORGERY IS ACCEPTED:
+  Attacker recovered τ_sub via Shor's → can build SRS_fake
+  → can prove ANY polynomial → verifier cannot distinguish.
+
+  FORGERY ACCEPTED — verifier cannot distinguish C_fake from C_real.
+
+  [Step 5 done in 0.1s]
+
+====================================================================
+  END-TO-END SUMMARY
+====================================================================
+
+  MNIST accuracy             : trained ✓
+  MNIST weight params (D)    : 1000
+  KZG commitment (real)      : (7504917395570725233, 7608340775988512878)
+  τ_full (secret)            : 9422318653889560067
+  τ_sub  (Shor's target)     : 22  (= τ mod 251)
+  τ_sub  recovered by Shor's : 22
+  Shor's simulator           : statevector
+  Shor's simulation time     : 3.98s
+  Forgery commitment         : (3900168934113360153, 1701819220873670253)
+
+  SECURITY ARGUMENT:
+  Classical BSGS on 64-bit   : hours (~137 GB RAM)
+  Shor's on N_sub=251       : 3.98s on simulator
+  Shor's on 64-bit (real QC) : ~189 qubits, O(63³) ops
+  Shor's on BN254 (Artemis)  : ~2330 qubits, O(254³) ≈ 16M ops
+  FRI+Poseidon               : Shor's CANNOT apply (no group)
+
+  QUBIT SCALING (Roetteler et al. 2017):
+
+  Curve                   log N   Qubits          RAM  Shor complexity           Status
+  ──────────────────────────────────────────────────────────────────────────────────────────
+  N_sub=251 (this demo)       8       24       256 MB  O(8³)   = 512 q-ops       3.98s on simulator
+  64-bit curve (server)      63      189  2^189 × 16B  O(63³) = 250K q-ops       ~hours on real QC
+  BN254 (Artemis prod)      254     2330   infeasible  O(254³) ≈ 16M q-ops       ~2330 logical qubits
+  FRI+Poseidon                0        0          N/A  CANNOT APPLY              Post-quantum secure
+
+
+====================================================================
+  FRI SESSION — Hash-based PC, Definition 2.2 (all 7 ops)
+  Post-Quantum Security for Artemis zkML — MTP2
+====================================================================
+
+  FRI uses SHA-256 Merkle tree (Poseidon in production).
+  No ECC, no tau, no SRS, no trusted setup.
+  Shor's / BSGS cannot apply — there is no cyclic group.
+
+  ── FRI SESSION A — PC.Setup ─────────────────────────────────
+
+==================================================================
+  PC.Setup  [FRI + Poseidon — Definition 2.2, Op 1]
+==================================================================
+  Degree bound     :  D = 5
+  Domain           :  xs = [0, 1, 2, 3, 4, 5, 6]
+  Domain size      :  D+2 = 7  points
+  Hash function    :  Poseidon (64-bit, t=9, alpha=5)
+  Prime field      :  p = 18446744073709551359
+  Nonce (field el) :  13899775726856552908  (random element of F_p)
+  Setup time       :  20.22 µs
+
+  ┌─────────────────────────────────────────────────────────┐
+  │  No secret trapdoor. No trusted setup. No toxic waste.  │
+  │  No SRS to generate. No ceremony required.              │
+  │  Security: Poseidon collision resistance over F_p.      │
+  └─────────────────────────────────────────────────────────┘
+==================================================================
+  FRI PC.Setup: no tau, no SRS, no trusted setup ✓
+
+  ── FRI SESSION B — PC.Commit ────────────────────────────────
+  Polynomial coefficients (first 6 MNIST weights): [134936, -84348, -27143, 49273, -87859, -88816]
+
+------------------------------------------------------------------
+  PC.Commit  [FRI+Poseidon — Merkle commitment]
+------------------------------------------------------------------
+  Polynomial g   :  g(X) = 134936 + -84348X + -27143X^2 + 49273X^3 + -87859X^4 + -88816X^5  (degree 5)
+  Domain         :  xs = [0, 1, 2, 3, 4, 5, 6]
+
+  Step 1 — Evaluate g at all domain points:
+    g(0) = 134936
+    g(1) = -103957
+    g(2) = -3996004
+    g(3) = -27730891
+    g(4) = -110922760
+    g(5) = -327268129
+    g(6) = -795203812
+
+  Step 2 — Hash each evaluation with Poseidon:
+    leaf[i] = Poseidon(g(xᵢ) mod p, nonce)
+    leaf[0] = Poseidon(134936, 13899775726856552908) = be4b64f8f2db6867
+    leaf[1] = Poseidon(18446744073709447402, 13899775726856552908) = a8f9fab5e5c2902d
+    leaf[2] = Poseidon(18446744073705555355, 13899775726856552908) = adb2ef6f34e9756a
+    leaf[3] = Poseidon(18446744073681820468, 13899775726856552908) = 0b57167c70492755
+    leaf[4] = Poseidon(18446744073598628599, 13899775726856552908) = 010a4eec8e3a3171
+    leaf[5] = Poseidon(18446744073382283230, 13899775726856552908) = 91c2310ae617607a
+    leaf[6] = Poseidon(18446744072914347547, 13899775726856552908) = dfb4f24fd132b09f
+
+  Step 3 — Build Merkle tree (internal nodes: Poseidon(left, right)):
+    Padded leaf count : 8
+    Number of levels  : 3
+    Root              : 91d09fbf4be7623a
+
+  Commitment root  :  91d09fbf4be7623a
+  Root size        :  8 bytes (Poseidon field element)
+  Commit time      :  184977.10 µs
+------------------------------------------------------------------
+  FRI PC.Commit: root=91d09fbf4be7623a (32 bytes, SHA-256)
+  This is a hash — NOT an ECC point. No group structure.
+
+  ── FRI SESSION C — PC.Verify ────────────────────────────────
+
+------------------------------------------------------------------
+  PC.Verify  [Recompute and compare Poseidon Merkle root]
+------------------------------------------------------------------
+  Recomputed root  :  91d09fbf4be7623a
+  Committed root   :  91d09fbf4be7623a
+  Match            :  True
+  PC.Verify        :  1  ← VALID ✓
+  Verify time      :  182126.10 µs
+------------------------------------------------------------------
+  FRI PC.Verify: 1 ✓
+
+  ── FRI SESSION D — PC.Open + PC.Check (honest) ─────────────
+
+------------------------------------------------------------------
+  PC.Open  [Poseidon Merkle evaluation proof]
+------------------------------------------------------------------
+  Domain index   :  x = 1  (xs[1] = 1)
+  Evaluation     :  y = g(1) = -103957
+  Merkle path    :  3 sibling hashes (24 bytes)
+    path[0] = be4b64f8f2db6867
+    path[1] = 124c5252ee93bb27
+    path[2] = a6cbb40c44808141
+  Open time      :  5.66 µs
+------------------------------------------------------------------
+
+------------------------------------------------------------------
+  PC.Check  [Walk Poseidon Merkle path from leaf to root]
+------------------------------------------------------------------
+  Claimed y       :  -103957
+  Leaf hash       :  Poseidon(18446744073709447402, 13899775726856552908) = a8f9fab5e5c2902d
+  Merkle path     :  3 sibling hashes
+
+  Walking Merkle path:
+    Step 1: pos=1 (right child)
+             sibling  = be4b64f8f2db6867
+             parent   = Poseidon(12176038726723604525, 13712164510848739431)
+             result   = ef8fecc690887acb
+    Step 2: pos=0 (left child)
+             sibling  = 124c5252ee93bb27
+             parent   = Poseidon(17262276234306943691, 1318519307056167719)
+             result   = a98d001e9f85088e
+    Step 3: pos=0 (left child)
+             sibling  = a6cbb40c44808141
+             parent   = Poseidon(12217421495651338382, 12018897995350180161)
+             result   = 91d09fbf4be7623a
+
+  Computed root   :  91d09fbf4be7623a
+  Expected root   :  91d09fbf4be7623a
+  Match           :  True
+  PC.Check        :  1  ← VALID ✓
+  Check time      :  53011.03 µs
+------------------------------------------------------------------
+  FRI PC.Open(x=1): y=-103957
+  FRI PC.Check (honest): 1 ✓
+
+  ── FRI SESSION E — Forgery attempt (must FAIL) ─────────────
+
+------------------------------------------------------------------
+  PC.Check  [Walk Poseidon Merkle path from leaf to root]
+------------------------------------------------------------------
+  Claimed y       :  99999
+  Leaf hash       :  Poseidon(99999, 13899775726856552908) = a11f54148586d563
+  Merkle path     :  3 sibling hashes
+
+  Walking Merkle path:
+    Step 1: pos=1 (right child)
+             sibling  = be4b64f8f2db6867
+             parent   = Poseidon(11610090811500713315, 13712164510848739431)
+             result   = 7870cec063d92e4c
+    Step 2: pos=0 (left child)
+             sibling  = 124c5252ee93bb27
+             parent   = Poseidon(8678663807647166028, 1318519307056167719)
+             result   = b2d5ae2d945e5df0
+    Step 3: pos=0 (left child)
+             sibling  = a6cbb40c44808141
+             parent   = Poseidon(12886397419576516080, 12018897995350180161)
+             result   = 337334a63235df88
+
+  Computed root   :  337334a63235df88
+  Expected root   :  91d09fbf4be7623a
+  Match           :  False
+  PC.Check        :  0  ← INVALID ✗
+  Check time      :  52628.41 µs
+------------------------------------------------------------------
+  FRI PC.Check (fake y=99999): 0 ← FORGERY REJECTED ✓
+
+  ── FRI SESSION F — Shor's on FRI root (must FAIL) ──────────
+  Shor's requires Q = w*G (ECC point in cyclic group)
+  FRI root = 91d09fbf4be7623a (SHA-256 bytes — NOT an ECC point)
+  FRI root as ECC point: (10507073574616392250, 0)
+  Is on curve: False — Shor's cannot proceed
+  SHOR'S FAILED — no group structure in SHA-256 output ✓
+
+  ── FRI SESSION G — PC.BatchOpen + PC.BatchCheck ────────────
+
+------------------------------------------------------------------
+  PC.BatchOpen  [Multiple Poseidon Merkle evaluation proofs]
+------------------------------------------------------------------
+  Opening at indices : [0, 1, 2]
+  Domain points      : [0, 1, 2]
+
+  ── x = 0 (index 0) ──
+    y = g(0) = 134936
+    Merkle path (3 hashes, 24 bytes):
+      path[0] = a8f9fab5e5c2902d
+      path[1] = 124c5252ee93bb27
+      path[2] = a6cbb40c44808141
+  ── x = 1 (index 1) ──
+    y = g(1) = -103957
+    Merkle path (3 hashes, 24 bytes):
+      path[0] = be4b64f8f2db6867
+      path[1] = 124c5252ee93bb27
+      path[2] = a6cbb40c44808141
+  ── x = 2 (index 2) ──
+    y = g(2) = -3996004
+    Merkle path (3 hashes, 24 bytes):
+      path[0] = 0b57167c70492755
+      path[1] = ef8fecc690887acb
+      path[2] = a6cbb40c44808141
+
+  Total batch proof size :  72 bytes
+  BatchOpen time         :  83.55 µs
+------------------------------------------------------------------
+
+------------------------------------------------------------------
+  PC.BatchCheck  [Verify all Poseidon Merkle evaluation proofs]
+------------------------------------------------------------------
+  x= 0 (idx 0), y=134936: PASS ✓   root = 91d09fbf4be7623a
+  x= 1 (idx 1), y=-103957: PASS ✓   root = 91d09fbf4be7623a
+  x= 2 (idx 2), y=-3996004: PASS ✓   root = 91d09fbf4be7623a
+
+  BatchCheck result  :  1  ← ALL PROOFS VALID ✓
+  BatchCheck time    :  157239.08 µs
+------------------------------------------------------------------
+  FRI PC.BatchOpen: 3 Merkle paths ✓
+  FRI PC.BatchCheck: 1 ✓
+
+═══════════════════════════════════════════════════════
+  SECURITY COMPARISON: KZG (64-bit) vs FRI+Poseidon
+  Definition 2.2 — Lycklama et al. arXiv:2409.12055
+═══════════════════════════════════════════════════════
+  Operation      | KZG (64-bit)           | FRI+Poseidon
+  ───────────────┼────────────────────────┼─────────────────────
+  PC.Setup       | SRS with 64-bit tau    | nonce only, no tau
+  PC.Commit      | ECC point (64-bit)     | Merkle root (32B)
+  PC.Verify      | 1 ✓                    | 1 ✓
+  PC.Open        | quotient polynomial    | Merkle path
+  PC.Check       | 1 ✓ honest | 0 tamper  | 1 ✓ honest | 0 fake
+  PC.BatchOpen   | 1 proof point          | 3 Merkle paths
+  PC.BatchCheck  | 1 ✓                    | 1 ✓
+  ───────────────┼────────────────────────┼─────────────────────
+ Shor's attack  | τ_sub recovered        | FAILED (no group)
+  Shor's (BN254) | ~2330 qubits feasible  | FAILED (no group)
+  Forgery        | ACCEPTED (broken)      | REJECTED (secure)
+  Post-quantum   | 0 bits (Shor's breaks) | 128 bits (Grover)
+  Trusted setup  | REQUIRED               | ELIMINATED
+═══════════════════════════════════════════════════════
+  CONCLUSION: Shor's quantum algorithm recovers the KZG
+  trapdoor τ, breaking Artemis integrity completely.
+  FRI+Poseidon has no discrete log structure — Shor's
+  algorithm cannot be applied. Post-quantum secure.
+═══════════════════════════════════════════════════════
+
+  Output: /home/koteswar/MTP2/mtp2-post-quantum-artemis-zkml/results/qiskit_shors_experiment.txt

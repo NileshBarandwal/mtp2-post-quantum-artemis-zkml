@@ -80,7 +80,7 @@ sys.path.insert(0, _SCRIPT_DIR)
 
 from ecc_utils_64bit import EllipticCurve, CURVE_A, CURVE_B, CURVE_P, CURVE_N
 from ecc_utils_64bit import _GX, _GY
-from fri_commitment import (
+from fri_commitment_poseidon import (
     pc_setup as fri_setup,
     pc_commit as fri_commit,
     pc_verify as fri_verify,
@@ -194,7 +194,8 @@ def train_mnist_and_extract_weights():
 
     print("  Loading MNIST...")
     t0 = time.perf_counter()
-    mnist = fetch_openml('mnist_784', version=1, as_frame=False, parser='auto')
+    #mnist = fetch_openml('mnist_784', version=1, as_frame=False, parser='auto')
+    mnist = fetch_openml('mnist_784', version=1, as_frame=False, parser='liac-arff')
     X, y  = mnist.data.astype(np.float32) / 255.0, mnist.target.astype(int)
     print(f"  Loaded {X.shape[0]} samples, {X.shape[1]} features  ({time.perf_counter()-t0:.1f}s)")
 
@@ -682,9 +683,8 @@ def main():
         print(f"  RAM available: {total - used:.1f} GB free / {total:.1f} GB total")
         print()
 
-        # ── Random tau ────────────────────────────────────────────────────────
-        random.seed(int(time.time()))
-        tau = random.randrange(1, n)
+        # ── Fixed tau ─────────────────────────────────────────────────────────
+        tau = 9422318653889560067
         Q   = curve.scalar_mul(tau, G)
 
         print(f"  τ (secret)      : {tau}  ({tau.bit_length()} bits)")

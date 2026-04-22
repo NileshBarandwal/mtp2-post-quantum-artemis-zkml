@@ -45,7 +45,7 @@ sys.path.insert(0, _SCRIPT_DIR)
 
 from ecc_utils_64bit import EllipticCurve, CURVE_A, CURVE_B, CURVE_P, CURVE_N
 from ecc_utils_64bit import _GX, _GY
-from fri_commitment import (
+from fri_commitment_poseidon import (
     pc_setup as fri_setup,
     pc_commit as fri_commit,
     pc_verify as fri_verify,
