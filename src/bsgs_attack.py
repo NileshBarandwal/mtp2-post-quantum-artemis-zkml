@@ -74,7 +74,8 @@ def bsgs(Q, G, n, curve):
     Time complexity:  O(m) = O(√n)  baby steps + O(m) giant steps = O(√n)
     Space complexity: O(m) = O(√n)  for the baby-step lookup table
 
-    Returns: w (integer) such that w·G == Q, or None if not found.
+    Returns: (w, baby_time, giant_time, steps) where w is the recovered scalar
+             (or None if not found), times are in seconds, steps is giant-step count.
     """
     m = math.isqrt(n) + 1   # Step size: m = ⌈√n⌉
 
@@ -83,12 +84,14 @@ def bsgs(Q, G, n, curve):
     # The table maps: curve_point → scalar_index
     #
     # This is the "small" direction: each entry is a small multiple of G.
+    t_baby = time.perf_counter()
     baby_table = {}
     baby_point = None           # 0·G = O (point at infinity)
     for i in range(m):
         # Store point as key (tuples are hashable in Python; None = infinity)
         baby_table[baby_point] = i
         baby_point = curve.point_add(baby_point, G)   # Increment: (i+1)·G
+    baby_time = time.perf_counter() - t_baby
 
     # ── Giant steps ──────────────────────────────────────────────────────────
     # Compute Q - j·(m·G) for j = 0, 1, ..., m and check baby table.
@@ -103,6 +106,7 @@ def bsgs(Q, G, n, curve):
     mG = curve.scalar_mul(m, G)         # The giant step increment: m·G
     neg_mG = curve.point_neg(mG)        # Negation for subtraction: -(m·G)
 
+    t_giant = time.perf_counter()
     giant_point = Q                     # Start at Q = w·G (j=0 case)
     for j in range(m + 1):
         if giant_point in baby_table:
@@ -110,11 +114,13 @@ def bsgs(Q, G, n, curve):
             w_candidate = (j * m + i) % n
             # Verify before returning (guards against hash collisions)
             if curve.scalar_mul(w_candidate, G) == Q:
-                return w_candidate
+                giant_time = time.perf_counter() - t_giant
+                return w_candidate, baby_time, giant_time, j
         # Subtract m·G: advance giant by one step
         giant_point = curve.point_add(giant_point, neg_mG)
 
-    return None   # Should not happen if n is the true group order
+    giant_time = time.perf_counter() - t_giant
+    return None, baby_time, giant_time, m + 1   # Should not happen if n is the true group order
 
 
 # ---------------------------------------------------------------------------
@@ -164,10 +170,8 @@ def run_bsgs_attack(curve, G, n, w_secret, label="w"):
     print(f"  Giant steps    : Compute C - j·(m·G) until collision found")
     print(f"  Complexity     : O(√{n}) ≈ {m} steps  (vs O(256³) Shor's at 256-bit)")
 
-    t0 = time.perf_counter()
-    w_recovered = bsgs(C, G, n, curve)
-    t1 = time.perf_counter()
-    elapsed_ms = (t1 - t0) * 1000
+    w_recovered, baby_ms, giant_ms, _ = bsgs(C, G, n, curve)
+    elapsed_ms = (baby_ms + giant_ms) * 1000
 
     # ── Step 3: Result and verification ───────────────────────────────────
     print()
@@ -228,7 +232,7 @@ def _run_correctness_tests(curve, G, n):
 
     for w in test_scalars:
         Q = curve.scalar_mul(w, G)
-        w_rec = bsgs(Q, G, n, curve)
+        w_rec, _, _, _ = bsgs(Q, G, n, curve)
         ok = (w_rec is not None) and (curve.scalar_mul(w_rec, G) == Q)
         status = "✓ PASS" if ok else "✗ FAIL"
         if not ok:

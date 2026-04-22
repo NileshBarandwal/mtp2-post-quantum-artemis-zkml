@@ -306,10 +306,8 @@ def session_d(ck, curve, G, n):
 
     print(f"  Running BSGS on target = SRS[1] = {target} ...")
 
-    t0 = time.perf_counter()
-    tau_recovered = bsgs(target, G, n, curve)
-    t1 = time.perf_counter()
-    elapsed_ms = (t1 - t0) * 1000
+    tau_recovered, baby_ms, giant_ms, _ = bsgs(target, G, n, curve)
+    elapsed_ms = (baby_ms + giant_ms) * 1000
 
     print()
     print(f"  ATTACK RESULT:")

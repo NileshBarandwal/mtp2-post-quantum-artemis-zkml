@@ -365,7 +365,7 @@ def session_d(ck, root, curve, G, n):
     error_type = ""
 
     try:
-        attack_result = bsgs(root, G, n, curve)
+        attack_result, _, _, _ = bsgs(root, G, n, curve)
     except (TypeError, ValueError, AttributeError) as e:
         attack_error = e
         error_type = type(e).__name__
@@ -833,9 +833,8 @@ def session_h(
     )
 
     # ── KZG: BSGS attack on live SRS (tau=428) ───────────────────────────────
-    t0 = time.perf_counter()
-    tau_recovered = bsgs(ck_kzg.srs[1], G, n, curve)
-    kzg_bsgs_ms = (time.perf_counter() - t0) * 1000
+    tau_recovered, baby_ms, giant_ms, _ = bsgs(ck_kzg.srs[1], G, n, curve)
+    kzg_bsgs_ms = (baby_ms + giant_ms) * 1000
     bsgs_success = (tau_recovered == 428)
 
     print(f"  KZG timings captured:")
