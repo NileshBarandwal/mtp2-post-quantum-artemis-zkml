@@ -117,6 +117,17 @@ class Tee:
         self._file.close()
 
 
+def fmt_time(seconds):
+    if seconds < 1e-3:
+        return f"{seconds*1e6:.2f}µs"
+    elif seconds < 1.0:
+        return f"{seconds*1e3:.2f}ms"
+    elif seconds < 3600:
+        return f"{seconds:.2f}s"
+    else:
+        return f"{seconds/3600:.2f}h"
+
+
 def get_ram_gb():
     try:
         info = {}
@@ -762,14 +773,14 @@ def main():
             print(f"  τ recovered  : {tau_rec}")
             print(f"  Matches true : {match}  ✓")
             print(f"  τ·G == Q     : {verify}  ✓")
-            print(f"  Baby steps   : {baby_t/3600:.2f}h")
-            print(f"  Giant steps  : {giant_t/3600:.2f}h  ({steps:,} steps)")
-            print(f"  Total BSGS   : {total_bsgs/3600:.2f}h")
+            print(f"  Baby steps   : {fmt_time(baby_t)}")
+            print(f"  Giant steps  : {fmt_time(giant_t)}  ({steps:,} steps)")
+            print(f"  Total BSGS   : {fmt_time(total_bsgs)}")
         else:
             print("  BSGS did not find τ (unexpected)")
             tau_rec = tau   # fall back for demo continuity
             print(f"  (Using true τ for Steps 5 to show forgery logic)")
-        print(f"  [Step 4 done in {total_bsgs/3600:.2f}h]")
+        print(f"  [Step 4 done in {fmt_time(total_bsgs)}]")
         print()
 
         # ── STEP 5: Forge commitment ──────────────────────────────────────────
@@ -788,7 +799,7 @@ def main():
         print(f"  KZG commitment (real)      : {C_real}")
         print(f"  τ recovered by BSGS        : {tau_rec}")
         print(f"  Forgery commitment         : {C_fake}")
-        print(f"  BSGS time                  : {total_bsgs/3600:.2f}h")
+        print(f"  BSGS time                  : {fmt_time(total_bsgs)}")
         print()
         print("  SECURITY ARGUMENT:")
         print("  Classical BSGS on 32-bit: ~100-200 ms (65,536 steps)")

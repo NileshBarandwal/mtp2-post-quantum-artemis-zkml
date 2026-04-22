@@ -27,14 +27,14 @@
 
   RAM available: 491.8 GB free / 501.4 GB total
 
-  τ (secret)    : 533352280  (29 bits)
-  Q = τG = SRS[1] : (3969295154, 603882660)
+  τ (secret)    : 616243981  (30 bits)
+  Q = τG = SRS[1] : (2212548975, 1757034915)
   BSGS goal: recover τ from Q and G
 
   Evaluation points (field elements < n):
-    eval_points[0] = 1356388981  (31 bits)
-    eval_points[1] = 1728952836  (31 bits)
-    eval_points[2] = 497189256  (29 bits)
+    eval_points[0] = 45300731  (26 bits)
+    eval_points[1] = 95818801  (27 bits)
+    eval_points[2] = 709024239  (30 bits)
 
   ================================================================
   STEP 1 — Train MNIST MLPClassifier(128, 64)
@@ -42,25 +42,25 @@
   Loading MNIST...
   Loaded 70000 samples, 784 features  (2.8s)
   Training MLPClassifier(hidden_layer_sizes=(128, 64))...
-  Training done in 14.8s
+  Training done in 14.3s
   Test accuracy : 96.93%
   Total weight+bias params : 109,386
   Scale factor             : 1000000  (float × 1000000 → int)
   Sample weights[0:5]      : [134936, -84348, -27143, 49273, -87859]
   Non-zero weights in first 1000: 202
 
-  [Step 1 done in 19.5s]
+  [Step 1 done in 18.9s]
 
   ================================================================
   STEP 2 — Build SRS (Structured Reference String)
   ================================================================
-  τ  = 533352280  (same tau used as BSGS target)
+  τ  = 616243981  (same tau used as BSGS target)
   D  = 1000  (degree = min(len(weights), 1000))
   SRS = [G, τG, τ²G, …, τᴰG]  (1001 points total)
   SRS built in 0.07s
   SRS[0] = G       = (1, 1789981121)
-  SRS[1] = τG      = (3969295154, 603882660)
-  SRS[2] = τ²G     = (1290267181, 2930058664)
+  SRS[1] = τG      = (2212548975, 1757034915)
+  SRS[2] = τ²G     = (3407979545, 1644953020)
 
   [Step 2 done in 0.1s]
 
@@ -70,7 +70,7 @@
   C_real = w[0]·G + w[1]·τG + w[2]·τ²G + … + w[999]·τ^999·G
   Using D = 1000 weights
   Commitment computed in 0.01s
-  C_real = (3511153306, 2023625260)
+  C_real = (485197655, 3546367269)
   On curve : True  ✓
   This single ECC point commits to all 1000 real MNIST weights.
 
@@ -89,9 +89,9 @@
   STEP 3c — PC.Open  [Definition 2.2, Op 4]
   ================================================================
   Opening polynomial at 3 evaluation points...
-  PC.Open(x=1356388981): y=1691118825, pi=(2139214504, 1872369537)
-  PC.Open(x=1728952836): y=47275814, pi=(360389888, 1471424501)
-  PC.Open(x=497189256): y=549195956, pi=(4066140567, 4281166997)
+  PC.Open(x=45300731): y=475242357, pi=(3825018198, 3130721379)
+  PC.Open(x=95818801): y=1637625477, pi=(4039845258, 1004910111)
+  PC.Open(x=709024239): y=1983515423, pi=(3218766312, 1415167661)
   [Step 3c done in 0.04s]
 
   ================================================================
@@ -104,9 +104,9 @@
   this is a demo; in production τ is destroyed and only the
   pairing-based check is possible. See MTP2 Section 2 for details.
 
-  PC.Check(x=1356388981): 1 ← PROOF VALID ✓
-  PC.Check(x=1728952836): 1 ← PROOF VALID ✓
-  PC.Check(x=497189256): 1 ← PROOF VALID ✓
+  PC.Check(x=45300731): 1 ← PROOF VALID ✓
+  PC.Check(x=95818801): 1 ← PROOF VALID ✓
+  PC.Check(x=709024239): 1 ← PROOF VALID ✓
   [Step 3d done in 0.00s]
 
   ================================================================
@@ -118,8 +118,8 @@
   directly. Tampered proof is checked against the original C_real
   (not the tampered commitment), so the check must return 0.
 
-  C_tampered (weight[42]+=1) = (1716548211, 1075692967)
-  C_real (original)          = (3511153306, 2023625260)
+  C_tampered (weight[42]+=1) = (4068009125, 2576102900)
+  C_real (original)          = (485197655, 3546367269)
   C_tampered == C_real       : False  (must be False ✓)
 
   PC.Check (tampered weight[42]+=1): 0 ← TAMPERING DETECTED ✓
@@ -129,30 +129,30 @@
   STEP 3f — PC.BatchOpen  [Definition 2.2, Op 6]
   ================================================================
   Computing single batch proof for all 3 evaluation points...
-  Eval points Q   : [1356388981, 1728952836, 497189256]
-  Claimed ys      : [1691118825, 47275814, 549195956]
-  Batch challenge : 1007110436
-  PC.BatchOpen: pi_batch=(2173918984, 2261127669)
+  Eval points Q   : [45300731, 95818801, 709024239]
+  Claimed ys      : [475242357, 1637625477, 1983515423]
+  Batch challenge : 512118506
+  PC.BatchOpen: pi_batch=(4030723774, 3987739345)
   [Step 3f done in 0.00s]
 
   ================================================================
   STEP 3g — PC.BatchCheck  [Definition 2.2, Op 7]
   ================================================================
   Verifying batch proof: Σ r^i(τ−x_i)·pi_i == Σ r^i(C−y_i·G) ...
-  Batch challenge r : 1007110436
-  LHS = Σ r^i(τ−x_i)·pi_i = (2919821692, 4030193095)
-  RHS = Σ r^i(C−y_i·G)    = (2919821692, 4030193095)
+  Batch challenge r : 512118506
+  LHS = Σ r^i(τ−x_i)·pi_i = (1019187084, 2658330442)
+  RHS = Σ r^i(C−y_i·G)    = (1019187084, 2658330442)
   PC.BatchCheck: 1 ← ALL EVALUATIONS VALID ✓
   [Step 3g done in 0.00s]
 
 
 ══ KZG ALL 7 PC OPERATIONS COMPLETE ══
-PC.Setup     : ✓ tau=533352280 (32-bit), SRS[1]=(3969295154, 603882660)
-PC.Commit    : ✓ C_real=(3511153306, 2023625260) — 1000 real MNIST weights
+PC.Setup     : ✓ tau=616243981 (32-bit), SRS[1]=(2212548975, 1757034915)
+PC.Commit    : ✓ C_real=(485197655, 3546367269) — 1000 real MNIST weights
 PC.Verify    : 1 ✓
-PC.Open      : ✓ x=[1356388981, 1728952836, 497189256]
+PC.Open      : ✓ x=[45300731, 95818801, 709024239]
 PC.Check     : 1,1,1 ✓ (honest) | 0 ✓ (tampered)
-PC.BatchOpen : ✓ pi_batch=(2173918984, 2261127669)
+PC.BatchOpen : ✓ pi_batch=(4030723774, 3987739345)
 PC.BatchCheck: 1 ✓
 ══ NOW RUNNING BSGS ATTACK ON SRS[1]=tau*G ══
 
@@ -161,22 +161,22 @@ PC.BatchCheck: 1 ✓
   ================================================================
 
 
-  τ recovered  : 533352280
+  τ recovered  : 616243981
   Matches true : True  ✓
   τ·G == Q     : True  ✓
-  Baby steps   : 0.00h
-  Giant steps  : 0.00h  (11,509 steps)
-  Total BSGS   : 0.00h
-  [Step 4 done in 0.00h]
+  Baby steps   : 79.36ms
+  Giant steps  : 20.38ms  (13,298 steps)
+  Total BSGS   : 101.65ms
+  [Step 4 done in 101.65ms]
 
   ================================================================
   STEP 5 — KZG Forgery with Recovered τ
   ================================================================
-  Recovered τ = 533352280
+  Recovered τ = 616243981
 
-  Real commitment   C_real   = (3511153306, 2023625260)
-  Fake commitment   C_fake   = (3533714367, 410099165)  (f_fake(x)=1+42x)
-  Poison commitment C_poison = (1360641439, 3882938198)  (real weights, weight[0]+9999)
+  Real commitment   C_real   = (485197655, 3546367269)
+  Fake commitment   C_fake   = (1021269431, 3451349241)  (f_fake(x)=1+42x)
+  Poison commitment C_poison = (3150098, 3696371294)  (real weights, weight[0]+9999)
 
   C_real   on curve : True
   C_fake   on curve : True
@@ -197,10 +197,10 @@ PC.BatchCheck: 1 ✓
 
   MNIST accuracy             : trained ✓
   MNIST weight params (D)    : 1000
-  KZG commitment (real)      : (3511153306, 2023625260)
-  τ recovered by BSGS        : 533352280
-  Forgery commitment         : (3533714367, 410099165)
-  BSGS time                  : 0.00h
+  KZG commitment (real)      : (485197655, 3546367269)
+  τ recovered by BSGS        : 616243981
+  Forgery commitment         : (1021269431, 3451349241)
+  BSGS time                  : 101.65ms
 
   SECURITY ARGUMENT:
   Classical BSGS on 32-bit: ~100-200 ms (65,536 steps)
@@ -228,8 +228,8 @@ PC.BatchCheck: 1 ✓
   Domain size      :  D+2 = 7  points
   Hash function    :  Poseidon (64-bit, t=9, alpha=5)
   Prime field      :  p = 18446744073709551359
-  Nonce (field el) :  4386072445656276954  (random element of F_p)
-  Setup time       :  32.44 µs
+  Nonce (field el) :  4676670219087974946  (random element of F_p)
+  Setup time       :  25.34 µs
 
   ┌─────────────────────────────────────────────────────────┐
   │  No secret trapdoor. No trusted setup. No toxic waste.  │
@@ -259,24 +259,24 @@ PC.BatchCheck: 1 ✓
 
   Step 2 — Hash each evaluation with Poseidon:
     leaf[i] = Poseidon(g(xᵢ) mod p, nonce)
-    leaf[0] = Poseidon(134936, 4386072445656276954) = 368969991906c92d
-    leaf[1] = Poseidon(18446744073709447402, 4386072445656276954) = b4da0fc6596d7a00
-    leaf[2] = Poseidon(18446744073705555355, 4386072445656276954) = 55b03a1942197448
-    leaf[3] = Poseidon(18446744073681820468, 4386072445656276954) = bd166fe379525793
-    leaf[4] = Poseidon(18446744073598628599, 4386072445656276954) = bfaa945b46a5584b
-    leaf[5] = Poseidon(18446744073382283230, 4386072445656276954) = 51c3ef38f40db0c1
-    leaf[6] = Poseidon(18446744072914347547, 4386072445656276954) = 77076e068238800e
+    leaf[0] = Poseidon(134936, 4676670219087974946) = 2fc8c06e93238628
+    leaf[1] = Poseidon(18446744073709447402, 4676670219087974946) = 54882b604c58a275
+    leaf[2] = Poseidon(18446744073705555355, 4676670219087974946) = 1c79cf4323a84764
+    leaf[3] = Poseidon(18446744073681820468, 4676670219087974946) = 67daaa7991e3097e
+    leaf[4] = Poseidon(18446744073598628599, 4676670219087974946) = 791725319c46f5e5
+    leaf[5] = Poseidon(18446744073382283230, 4676670219087974946) = 567cc9364636a3c8
+    leaf[6] = Poseidon(18446744072914347547, 4676670219087974946) = a3c4b4c7d56dbf8c
 
   Step 3 — Build Merkle tree (internal nodes: Poseidon(left, right)):
     Padded leaf count : 8
     Number of levels  : 3
-    Root              : b49ee01f3013c433
+    Root              : 175c0ed63bd1c674
 
-  Commitment root  :  b49ee01f3013c433
+  Commitment root  :  175c0ed63bd1c674
   Root size        :  8 bytes (Poseidon field element)
-  Commit time      :  184055.85 µs
+  Commit time      :  184262.43 µs
 ------------------------------------------------------------------
-  FRI PC.Commit: root=b49ee01f3013c433 (32 bytes, SHA-256)
+  FRI PC.Commit: root=175c0ed63bd1c674 (32 bytes, SHA-256)
   This is a hash — NOT an ECC point. No group structure.
 
   ── FRI SESSION C — PC.Verify ────────────────────────────────
@@ -284,11 +284,11 @@ PC.BatchCheck: 1 ✓
 ------------------------------------------------------------------
   PC.Verify  [Recompute and compare Poseidon Merkle root]
 ------------------------------------------------------------------
-  Recomputed root  :  b49ee01f3013c433
-  Committed root   :  b49ee01f3013c433
+  Recomputed root  :  175c0ed63bd1c674
+  Committed root   :  175c0ed63bd1c674
   Match            :  True
   PC.Verify        :  1  ← VALID ✓
-  Verify time      :  183167.34 µs
+  Verify time      :  182376.14 µs
 ------------------------------------------------------------------
   FRI PC.Verify: 1 ✓
 
@@ -300,38 +300,38 @@ PC.BatchCheck: 1 ✓
   Domain index   :  x = 1  (xs[1] = 1)
   Evaluation     :  y = g(1) = -103957
   Merkle path    :  3 sibling hashes (24 bytes)
-    path[0] = 368969991906c92d
-    path[1] = 30fdb3f5f7ec0e5a
-    path[2] = 0f24afb1217ae60c
-  Open time      :  9.46 µs
+    path[0] = 2fc8c06e93238628
+    path[1] = 7dfc8331837578a3
+    path[2] = c8ef08f93df8119c
+  Open time      :  7.61 µs
 ------------------------------------------------------------------
 
 ------------------------------------------------------------------
   PC.Check  [Walk Poseidon Merkle path from leaf to root]
 ------------------------------------------------------------------
   Claimed y       :  -103957
-  Leaf hash       :  Poseidon(18446744073709447402, 4386072445656276954) = b4da0fc6596d7a00
+  Leaf hash       :  Poseidon(18446744073709447402, 4676670219087974946) = 54882b604c58a275
   Merkle path     :  3 sibling hashes
 
   Walking Merkle path:
     Step 1: pos=1 (right child)
-             sibling  = 368969991906c92d
-             parent   = Poseidon(13031745816328239616, 3929788256128256301)
-             result   = e2819c43e1c67483
+             sibling  = 2fc8c06e93238628
+             parent   = Poseidon(6091166188616327797, 3443213496272258600)
+             result   = c82fe24cf9818141
     Step 2: pos=0 (left child)
-             sibling  = 30fdb3f5f7ec0e5a
-             parent   = Poseidon(16321498339932009603, 3530175551936138842)
-             result   = 4b44dc49a46cc2b2
+             sibling  = 7dfc8331837578a3
+             parent   = Poseidon(14424996951722393921, 9078275197554227363)
+             result   = 05a0c822ae242936
     Step 3: pos=0 (left child)
-             sibling  = 0f24afb1217ae60c
-             parent   = Poseidon(5423702060110234290, 1091190185036277260)
-             result   = b49ee01f3013c433
+             sibling  = c8ef08f93df8119c
+             parent   = Poseidon(405544017739393334, 14478801193598980508)
+             result   = 175c0ed63bd1c674
 
-  Computed root   :  b49ee01f3013c433
-  Expected root   :  b49ee01f3013c433
+  Computed root   :  175c0ed63bd1c674
+  Expected root   :  175c0ed63bd1c674
   Match           :  True
   PC.Check        :  1  ← VALID ✓
-  Check time      :  52616.02 µs
+  Check time      :  52483.74 µs
 ------------------------------------------------------------------
   FRI PC.Open(x=1): y=-103957
   FRI PC.Check (honest): 1 ✓
@@ -342,36 +342,36 @@ PC.BatchCheck: 1 ✓
   PC.Check  [Walk Poseidon Merkle path from leaf to root]
 ------------------------------------------------------------------
   Claimed y       :  99999
-  Leaf hash       :  Poseidon(99999, 4386072445656276954) = e7eed40f508cec68
+  Leaf hash       :  Poseidon(99999, 4676670219087974946) = ed9d96083d45d231
   Merkle path     :  3 sibling hashes
 
   Walking Merkle path:
     Step 1: pos=1 (right child)
-             sibling  = 368969991906c92d
-             parent   = Poseidon(16712528429459500136, 3929788256128256301)
-             result   = 67480dd3faa6012d
+             sibling  = 2fc8c06e93238628
+             parent   = Poseidon(17122006320464384561, 3443213496272258600)
+             result   = 582e401c9f161830
     Step 2: pos=0 (left child)
-             sibling  = 30fdb3f5f7ec0e5a
-             parent   = Poseidon(7442213588324188461, 3530175551936138842)
-             result   = 9ad3eaf318ba9b48
+             sibling  = 7dfc8331837578a3
+             parent   = Poseidon(6354086615938635824, 9078275197554227363)
+             result   = 28cfa1e375d17b99
     Step 3: pos=0 (left child)
-             sibling  = 0f24afb1217ae60c
-             parent   = Poseidon(11156519031739685704, 1091190185036277260)
-             result   = f7a090de3f4accc2
+             sibling  = c8ef08f93df8119c
+             parent   = Poseidon(2940747080002534297, 14478801193598980508)
+             result   = 740b9bade12f09cb
 
-  Computed root   :  f7a090de3f4accc2
-  Expected root   :  b49ee01f3013c433
+  Computed root   :  740b9bade12f09cb
+  Expected root   :  175c0ed63bd1c674
   Match           :  False
   PC.Check        :  0  ← INVALID ✗
-  Check time      :  52475.65 µs
+  Check time      :  52374.24 µs
 ------------------------------------------------------------------
   FRI PC.Check (fake y=99999): 0 ← FORGERY REJECTED ✓
 
   ── FRI SESSION F — BSGS attempt on FRI root (must FAIL) ────
   Attempting BSGS on FRI Merkle root...
   BSGS requires Q = w*G (ECC point in cyclic group)
-  FRI root = b49ee01f3013c433 (SHA-256 bytes — NOT an ECC point)
-  FRI root as ECC point: (13015086397702521907, 0)
+  FRI root = 175c0ed63bd1c674 (SHA-256 bytes — NOT an ECC point)
+  FRI root as ECC point: (1683236674019116660, 0)
   Is on curve: False — BSGS cannot proceed
   BSGS FAILED — no group structure in SHA-256 output ✓
 
@@ -386,35 +386,35 @@ PC.BatchCheck: 1 ✓
   ── x = 0 (index 0) ──
     y = g(0) = 134936
     Merkle path (3 hashes, 24 bytes):
-      path[0] = b4da0fc6596d7a00
-      path[1] = 30fdb3f5f7ec0e5a
-      path[2] = 0f24afb1217ae60c
+      path[0] = 54882b604c58a275
+      path[1] = 7dfc8331837578a3
+      path[2] = c8ef08f93df8119c
   ── x = 1 (index 1) ──
     y = g(1) = -103957
     Merkle path (3 hashes, 24 bytes):
-      path[0] = 368969991906c92d
-      path[1] = 30fdb3f5f7ec0e5a
-      path[2] = 0f24afb1217ae60c
+      path[0] = 2fc8c06e93238628
+      path[1] = 7dfc8331837578a3
+      path[2] = c8ef08f93df8119c
   ── x = 2 (index 2) ──
     y = g(2) = -3996004
     Merkle path (3 hashes, 24 bytes):
-      path[0] = bd166fe379525793
-      path[1] = e2819c43e1c67483
-      path[2] = 0f24afb1217ae60c
+      path[0] = 67daaa7991e3097e
+      path[1] = c82fe24cf9818141
+      path[2] = c8ef08f93df8119c
 
   Total batch proof size :  72 bytes
-  BatchOpen time         :  88.60 µs
+  BatchOpen time         :  84.98 µs
 ------------------------------------------------------------------
 
 ------------------------------------------------------------------
   PC.BatchCheck  [Verify all Poseidon Merkle evaluation proofs]
 ------------------------------------------------------------------
-  x= 0 (idx 0), y=134936: PASS ✓   root = b49ee01f3013c433
-  x= 1 (idx 1), y=-103957: PASS ✓   root = b49ee01f3013c433
-  x= 2 (idx 2), y=-3996004: PASS ✓   root = b49ee01f3013c433
+  x= 0 (idx 0), y=134936: PASS ✓   root = 175c0ed63bd1c674
+  x= 1 (idx 1), y=-103957: PASS ✓   root = 175c0ed63bd1c674
+  x= 2 (idx 2), y=-3996004: PASS ✓   root = 175c0ed63bd1c674
 
   BatchCheck result  :  1  ← ALL PROOFS VALID ✓
-  BatchCheck time    :  156465.23 µs
+  BatchCheck time    :  156480.42 µs
 ------------------------------------------------------------------
   FRI PC.BatchOpen: 3 Merkle paths ✓
   FRI PC.BatchCheck: 1 ✓

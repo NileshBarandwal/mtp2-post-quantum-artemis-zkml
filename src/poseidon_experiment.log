@@ -1,0 +1,763 @@
+/home/koteswar/MTP2/venv/lib/python3.12/site-packages/sklearn/neural_network/_multilayer_perceptron.py:785: ConvergenceWarning: Stochastic Optimizer: Maximum iterations (20) reached and the optimization hasn't converged yet.
+  warnings.warn(
+
+====================================================================
+  KZG FORGERY VIA 64-BIT BSGS — Full End-to-End Demo
+  Post-Quantum Security for Artemis zkML — MTP2
+  Author: Nilesh R. Barandwal, IIT Dharwad
+====================================================================
+
+  PIPELINE:
+    1. Train MNIST MLPClassifier(128,64) → extract integer weights
+    2. Build SRS = [G, τG, τ²G, …] with random 64-bit τ
+    3. Commit real MNIST weights: C_real = Σ wᵢ · SRS[i]
+   3b. PC.Verify  — Definition 2.2, Op 3
+   3c. PC.Open    — Definition 2.2, Op 4
+   3d. PC.Check   — Definition 2.2, Op 5 (honest)
+   3e. PC.Check   — Definition 2.2, Op 5 (tampered)
+   3f. PC.BatchOpen  — Definition 2.2, Op 6
+   3g. PC.BatchCheck — Definition 2.2, Op 7
+    4. BSGS attack → recover τ from SRS[1] = τG
+    5. Forge commitment with recovered τ
+  FRI. All 7 FRI PC operations — BSGS fails (no group structure)
+
+  Curve  :  y² = x³ + 7800851958821274545x + 3032140762713616321  (mod 12543974025918169487)
+  G      :  (9288838633539720391, 2052742288688552359)
+  n      :  12543974020049812861  (2^63.44)  ← PRIME, exact (h=1)
+
+  RAM available: 491.9 GB free / 501.4 GB total
+
+  τ (secret)    : 9422318653889560067  (64 bits)
+  Q = τG = SRS[1] : (9129902419393540222, 5073090480770511888)
+  BSGS goal: recover τ from Q and G
+
+  Evaluation points (field elements < n):
+    eval_points[0] = 5073246028684867406  (63 bits)
+    eval_points[1] = 10582035904856954895  (64 bits)
+    eval_points[2] = 12100664335834928503  (64 bits)
+
+  ================================================================
+  STEP 1 — Train MNIST MLPClassifier(128, 64)
+  ================================================================
+  Loading MNIST...
+  Loaded 70000 samples, 784 features  (2.8s)
+  Training MLPClassifier(hidden_layer_sizes=(128, 64))...
+  Training done in 14.4s
+  Test accuracy : 96.93%
+  Total weight+bias params : 109,386
+  Scale factor             : 1000000  (float × 1000000 → int)
+  Sample weights[0:5]      : [134936, -84348, -27143, 49273, -87859]
+  Non-zero weights in first 1000: 202
+
+  [Step 1 done in 19.0s]
+
+  ================================================================
+  STEP 2 — Build SRS (Structured Reference String)
+  ================================================================
+  τ  = 9422318653889560067  (same tau used as BSGS target)
+  D  = 1000  (degree = min(len(weights), 1000))
+  SRS = [G, τG, τ²G, …, τᴰG]  (1001 points total)
+  SRS built in 0.30s
+  SRS[0] = G       = (9288838633539720391, 2052742288688552359)
+  SRS[1] = τG      = (9129902419393540222, 5073090480770511888)
+  SRS[2] = τ²G     = (9772424597458379062, 3947780943161088301)
+
+  [Step 2 done in 0.3s]
+
+  ================================================================
+  STEP 3 — KZG Commitment to Real MNIST Weights
+  ================================================================
+  C_real = w[0]·G + w[1]·τG + w[2]·τ²G + … + w[999]·τ^999·G
+  Using D = 1000 weights
+  Commitment computed in 0.05s
+  C_real = (7504917395570725233, 7608340775988512878)
+  On curve : True  ✓
+  This single ECC point commits to all 1000 real MNIST weights.
+
+  [Step 3 done in 0.0s]
+
+  ================================================================
+  STEP 3b — PC.Verify  [Definition 2.2, Op 3]
+  ================================================================
+  Recomputing C from weights and SRS to verify commitment...
+  Recomputed C == C_real : True
+  PC.Verify  [Definition 2.2, Op 3]
+  PC.Verify : 1 ← VALID ✓
+  [Step 3b done in 0.05s]
+
+  ================================================================
+  STEP 3c — PC.Open  [Definition 2.2, Op 4]
+  ================================================================
+  Opening polynomial at 3 large evaluation points...
+  PC.Open(x=5073246028684867406): y=4621050831958304495, pi=(4254841019571702647, 7678640795585421312)
+  PC.Open(x=10582035904856954895): y=4338210721882825771, pi=(7374750198482048506, 8143799014940986146)
+  PC.Open(x=12100664335834928503): y=4711651416057003306, pi=(4511447236961192556, 12123912236720815962)
+  [Step 3c done in 0.19s]
+
+  ================================================================
+  STEP 3d — PC.Check (honest)  [Definition 2.2, Op 5]
+  ================================================================
+  Verifying each opening proof against C_real...
+
+  NOTE: PC.Check here is an algebraic simulation of the bilinear
+  pairing check e(π,[τ−x]₂)=e(C−y·G,H). We use τ directly as
+  this is a demo; in production τ is destroyed and only the
+  pairing-based check is possible. See MTP2 Section 2 for details.
+
+  PC.Check(x=5073246028684867406): 1 ← PROOF VALID ✓
+  PC.Check(x=10582035904856954895): 1 ← PROOF VALID ✓
+  PC.Check(x=12100664335834928503): 1 ← PROOF VALID ✓
+  [Step 3d done in 0.00s]
+
+  ================================================================
+  STEP 3e — PC.Check (tamper test)  [Definition 2.2, Op 5]
+  ================================================================
+  Tampering with weight[42] += 1 and checking against C_real...
+
+  NOTE: Same algebraic simulation as Step 3d — verifier uses τ
+  directly. Tampered proof is checked against the original C_real
+  (not the tampered commitment), so the check must return 0.
+
+  C_tampered (weight[42]+=1) = (11777772238636129020, 7620750606608075589)
+  C_real (original)          = (7504917395570725233, 7608340775988512878)
+  C_tampered == C_real       : False  (must be False ✓)
+
+  PC.Check (tampered weight[42]+=1): 0 ← TAMPERING DETECTED ✓
+  [Step 3e done in 0.11s]
+
+  ================================================================
+  STEP 3f — PC.BatchOpen  [Definition 2.2, Op 6]
+  ================================================================
+  Computing single batch proof for all 3 evaluation points...
+  Eval points Q   : [5073246028684867406, 10582035904856954895, 12100664335834928503]
+  Claimed ys      : [4621050831958304495, 4338210721882825771, 4711651416057003306]
+  Batch challenge : 65517859287063581
+  PC.BatchOpen: pi_batch=(506658224117734296, 3457065125701617193)
+  [Step 3f done in 0.00s]
+
+  ================================================================
+  STEP 3g — PC.BatchCheck  [Definition 2.2, Op 7]
+  ================================================================
+  Verifying batch proof: Σ r^i(τ−x_i)·pi_i == Σ r^i(C−y_i·G) ...
+  Batch challenge r : 65517859287063581
+  LHS = Σ r^i(τ−x_i)·pi_i = (5911474291921826380, 11998824905069220572)
+  RHS = Σ r^i(C−y_i·G)    = (5911474291921826380, 11998824905069220572)
+  PC.BatchCheck: 1 ← ALL EVALUATIONS VALID ✓
+  [Step 3g done in 0.00s]
+
+
+══ KZG ALL 7 PC OPERATIONS COMPLETE ══
+PC.Setup     : ✓ tau=9422318653889560067 (64-bit), SRS[1]=(9129902419393540222, 5073090480770511888)
+PC.Commit    : ✓ C_real=(7504917395570725233, 7608340775988512878) — 1000 real MNIST weights
+PC.Verify    : 1 ✓
+PC.Open      : ✓ x=[5073246028684867406, 10582035904856954895, 12100664335834928503]
+PC.Check     : 1,1,1 ✓ (honest) | 0 ✓ (tampered)
+PC.BatchOpen : ✓ pi_batch=(506658224117734296, 3457065125701617193)
+PC.BatchCheck: 1 ✓
+══ NOW RUNNING BSGS ATTACK ON SRS[1]=tau*G ══
+
+  ================================================================
+  STEP 4 — BSGS Attack: Recover τ from SRS[1] = τG
+  ================================================================
+
+  Baby-step table  m        = 3,541,747,312  (2^31.7)
+  Hash-table slots           = 8,589,934,592  (2^33)
+  RAM for numpy arrays       ≈ 137.4 GB
+
+  Allocating numpy hash table...
+  Allocation done in 27.4s  |  RAM: 74.1/501.4 GB
+
+  Building baby-step table...
+  (Progress every 100M entries)
+    [100M entries]  RAM: 138.1/501.4 GB  |  Elapsed: 0.19h  |  ETA: 6.40h
+    [200M entries]  RAM: 138.2/501.4 GB  |  Elapsed: 0.38h  |  ETA: 6.28h
+    [300M entries]  RAM: 138.2/501.4 GB  |  Elapsed: 0.57h  |  ETA: 6.11h
+    [400M entries]  RAM: 138.4/501.4 GB  |  Elapsed: 0.75h  |  ETA: 5.93h
+    [500M entries]  RAM: 138.3/501.4 GB  |  Elapsed: 0.94h  |  ETA: 5.74h
+    [600M entries]  RAM: 138.2/501.4 GB  |  Elapsed: 1.13h  |  ETA: 5.55h
+    [700M entries]  RAM: 138.2/501.4 GB  |  Elapsed: 1.32h  |  ETA: 5.37h
+    [800M entries]  RAM: 138.5/501.4 GB  |  Elapsed: 1.51h  |  ETA: 5.18h
+    [900M entries]  RAM: 138.3/501.4 GB  |  Elapsed: 1.70h  |  ETA: 4.99h
+    [1000M entries]  RAM: 138.3/501.4 GB  |  Elapsed: 1.89h  |  ETA: 4.81h
+    [1100M entries]  RAM: 138.2/501.4 GB  |  Elapsed: 2.08h  |  ETA: 4.62h
+    [1200M entries]  RAM: 138.2/501.4 GB  |  Elapsed: 2.27h  |  ETA: 4.43h
+    [1300M entries]  RAM: 138.4/501.4 GB  |  Elapsed: 2.46h  |  ETA: 4.25h
+    [1400M entries]  RAM: 138.4/501.4 GB  |  Elapsed: 2.66h  |  ETA: 4.06h
+    [1500M entries]  RAM: 138.4/501.4 GB  |  Elapsed: 2.85h  |  ETA: 3.87h
+    [1600M entries]  RAM: 138.2/501.4 GB  |  Elapsed: 3.04h  |  ETA: 3.69h
+    [1700M entries]  RAM: 138.2/501.4 GB  |  Elapsed: 3.23h  |  ETA: 3.50h
+    [1800M entries]  RAM: 138.2/501.4 GB  |  Elapsed: 3.42h  |  ETA: 3.31h
+    [1900M entries]  RAM: 138.5/501.4 GB  |  Elapsed: 3.61h  |  ETA: 3.12h
+    [2000M entries]  RAM: 138.4/501.4 GB  |  Elapsed: 3.81h  |  ETA: 2.93h
+    [2100M entries]  RAM: 138.4/501.4 GB  |  Elapsed: 4.00h  |  ETA: 2.75h
+    [2200M entries]  RAM: 138.2/501.4 GB  |  Elapsed: 4.19h  |  ETA: 2.56h
+    [2300M entries]  RAM: 138.2/501.4 GB  |  Elapsed: 4.38h  |  ETA: 2.37h
+    [2400M entries]  RAM: 138.3/501.4 GB  |  Elapsed: 4.58h  |  ETA: 2.18h
+    [2500M entries]  RAM: 138.2/501.4 GB  |  Elapsed: 4.77h  |  ETA: 1.99h
+    [2600M entries]  RAM: 138.4/501.4 GB  |  Elapsed: 4.96h  |  ETA: 1.80h
+    [2700M entries]  RAM: 138.4/501.4 GB  |  Elapsed: 5.16h  |  ETA: 1.61h
+    [2800M entries]  RAM: 138.4/501.4 GB  |  Elapsed: 5.35h  |  ETA: 1.42h
+    [2900M entries]  RAM: 138.4/501.4 GB  |  Elapsed: 5.54h  |  ETA: 1.23h
+    [3000M entries]  RAM: 138.4/501.4 GB  |  Elapsed: 5.74h  |  ETA: 1.04h
+    [3100M entries]  RAM: 138.4/501.4 GB  |  Elapsed: 5.93h  |  ETA: 0.85h
+    [3200M entries]  RAM: 138.4/501.4 GB  |  Elapsed: 6.13h  |  ETA: 0.65h
+    [3300M entries]  RAM: 138.4/501.4 GB  |  Elapsed: 6.32h  |  ETA: 0.46h
+    [3400M entries]  RAM: 138.4/501.4 GB  |  Elapsed: 6.52h  |  ETA: 0.27h
+    [3500M entries]  RAM: 138.4/501.4 GB  |  Elapsed: 6.72h  |  ETA: 0.08h
+  Baby-step table COMPLETE  |  6.80h  |  RAM: 138.5/501.4 GB
+
+  Giant-step search...
+    [Giant 10M]  Elapsed: 0.02h  |  ETA: 5.34h
+    [Giant 20M]  Elapsed: 0.03h  |  ETA: 5.14h
+    [Giant 30M]  Elapsed: 0.04h  |  ETA: 5.19h
+    [Giant 40M]  Elapsed: 0.06h  |  ETA: 5.25h
+    [Giant 50M]  Elapsed: 0.08h  |  ETA: 5.29h
+    [Giant 60M]  Elapsed: 0.09h  |  ETA: 5.31h
+    [Giant 70M]  Elapsed: 0.11h  |  ETA: 5.31h
+    [Giant 80M]  Elapsed: 0.12h  |  ETA: 5.28h
+    [Giant 90M]  Elapsed: 0.14h  |  ETA: 5.27h
+    [Giant 100M]  Elapsed: 0.15h  |  ETA: 5.27h
+    [Giant 110M]  Elapsed: 0.17h  |  ETA: 5.26h
+    [Giant 120M]  Elapsed: 0.18h  |  ETA: 5.25h
+    [Giant 130M]  Elapsed: 0.20h  |  ETA: 5.23h
+    [Giant 140M]  Elapsed: 0.21h  |  ETA: 5.21h
+    [Giant 150M]  Elapsed: 0.23h  |  ETA: 5.19h
+    [Giant 160M]  Elapsed: 0.24h  |  ETA: 5.17h
+    [Giant 170M]  Elapsed: 0.26h  |  ETA: 5.16h
+    [Giant 180M]  Elapsed: 0.27h  |  ETA: 5.14h
+    [Giant 190M]  Elapsed: 0.29h  |  ETA: 5.12h
+    [Giant 200M]  Elapsed: 0.31h  |  ETA: 5.11h
+    [Giant 210M]  Elapsed: 0.32h  |  ETA: 5.10h
+    [Giant 220M]  Elapsed: 0.34h  |  ETA: 5.09h
+    [Giant 230M]  Elapsed: 0.35h  |  ETA: 5.08h
+    [Giant 240M]  Elapsed: 0.37h  |  ETA: 5.07h
+    [Giant 250M]  Elapsed: 0.38h  |  ETA: 5.05h
+    [Giant 260M]  Elapsed: 0.40h  |  ETA: 5.03h
+    [Giant 270M]  Elapsed: 0.41h  |  ETA: 5.02h
+    [Giant 280M]  Elapsed: 0.43h  |  ETA: 5.00h
+    [Giant 290M]  Elapsed: 0.44h  |  ETA: 4.98h
+    [Giant 300M]  Elapsed: 0.46h  |  ETA: 4.97h
+    [Giant 310M]  Elapsed: 0.48h  |  ETA: 4.96h
+    [Giant 320M]  Elapsed: 0.49h  |  ETA: 4.95h
+    [Giant 330M]  Elapsed: 0.51h  |  ETA: 4.93h
+    [Giant 340M]  Elapsed: 0.52h  |  ETA: 4.91h
+    [Giant 350M]  Elapsed: 0.54h  |  ETA: 4.90h
+    [Giant 360M]  Elapsed: 0.55h  |  ETA: 4.89h
+    [Giant 370M]  Elapsed: 0.57h  |  ETA: 4.87h
+    [Giant 380M]  Elapsed: 0.58h  |  ETA: 4.85h
+    [Giant 390M]  Elapsed: 0.60h  |  ETA: 4.84h
+    [Giant 400M]  Elapsed: 0.61h  |  ETA: 4.82h
+    [Giant 410M]  Elapsed: 0.63h  |  ETA: 4.81h
+    [Giant 420M]  Elapsed: 0.65h  |  ETA: 4.79h
+    [Giant 430M]  Elapsed: 0.66h  |  ETA: 4.78h
+    [Giant 440M]  Elapsed: 0.68h  |  ETA: 4.77h
+    [Giant 450M]  Elapsed: 0.69h  |  ETA: 4.75h
+    [Giant 460M]  Elapsed: 0.71h  |  ETA: 4.74h
+    [Giant 470M]  Elapsed: 0.72h  |  ETA: 4.72h
+    [Giant 480M]  Elapsed: 0.74h  |  ETA: 4.70h
+    [Giant 490M]  Elapsed: 0.75h  |  ETA: 4.69h
+    [Giant 500M]  Elapsed: 0.77h  |  ETA: 4.68h
+    [Giant 510M]  Elapsed: 0.78h  |  ETA: 4.66h
+    [Giant 520M]  Elapsed: 0.80h  |  ETA: 4.65h
+    [Giant 530M]  Elapsed: 0.81h  |  ETA: 4.63h
+    [Giant 540M]  Elapsed: 0.83h  |  ETA: 4.62h
+    [Giant 550M]  Elapsed: 0.85h  |  ETA: 4.60h
+    [Giant 560M]  Elapsed: 0.86h  |  ETA: 4.59h
+    [Giant 570M]  Elapsed: 0.88h  |  ETA: 4.57h
+    [Giant 580M]  Elapsed: 0.89h  |  ETA: 4.56h
+    [Giant 590M]  Elapsed: 0.91h  |  ETA: 4.54h
+    [Giant 600M]  Elapsed: 0.92h  |  ETA: 4.52h
+    [Giant 610M]  Elapsed: 0.94h  |  ETA: 4.51h
+    [Giant 620M]  Elapsed: 0.95h  |  ETA: 4.49h
+    [Giant 630M]  Elapsed: 0.97h  |  ETA: 4.48h
+    [Giant 640M]  Elapsed: 0.98h  |  ETA: 4.46h
+    [Giant 650M]  Elapsed: 1.00h  |  ETA: 4.44h
+    [Giant 660M]  Elapsed: 1.01h  |  ETA: 4.43h
+    [Giant 670M]  Elapsed: 1.03h  |  ETA: 4.41h
+    [Giant 680M]  Elapsed: 1.04h  |  ETA: 4.40h
+    [Giant 690M]  Elapsed: 1.06h  |  ETA: 4.38h
+    [Giant 700M]  Elapsed: 1.08h  |  ETA: 4.37h
+    [Giant 710M]  Elapsed: 1.09h  |  ETA: 4.35h
+    [Giant 720M]  Elapsed: 1.11h  |  ETA: 4.34h
+    [Giant 730M]  Elapsed: 1.12h  |  ETA: 4.32h
+    [Giant 740M]  Elapsed: 1.14h  |  ETA: 4.31h
+    [Giant 750M]  Elapsed: 1.15h  |  ETA: 4.29h
+    [Giant 760M]  Elapsed: 1.17h  |  ETA: 4.28h
+    [Giant 770M]  Elapsed: 1.18h  |  ETA: 4.26h
+    [Giant 780M]  Elapsed: 1.20h  |  ETA: 4.24h
+    [Giant 790M]  Elapsed: 1.21h  |  ETA: 4.23h
+    [Giant 800M]  Elapsed: 1.23h  |  ETA: 4.21h
+    [Giant 810M]  Elapsed: 1.25h  |  ETA: 4.20h
+    [Giant 820M]  Elapsed: 1.26h  |  ETA: 4.19h
+    [Giant 830M]  Elapsed: 1.28h  |  ETA: 4.17h
+    [Giant 840M]  Elapsed: 1.29h  |  ETA: 4.15h
+    [Giant 850M]  Elapsed: 1.31h  |  ETA: 4.14h
+    [Giant 860M]  Elapsed: 1.32h  |  ETA: 4.12h
+    [Giant 870M]  Elapsed: 1.34h  |  ETA: 4.11h
+    [Giant 880M]  Elapsed: 1.35h  |  ETA: 4.09h
+    [Giant 890M]  Elapsed: 1.37h  |  ETA: 4.07h
+    [Giant 900M]  Elapsed: 1.38h  |  ETA: 4.06h
+    [Giant 910M]  Elapsed: 1.40h  |  ETA: 4.05h
+    [Giant 920M]  Elapsed: 1.41h  |  ETA: 4.03h
+    [Giant 930M]  Elapsed: 1.43h  |  ETA: 4.01h
+    [Giant 940M]  Elapsed: 1.44h  |  ETA: 4.00h
+    [Giant 950M]  Elapsed: 1.46h  |  ETA: 3.98h
+    [Giant 960M]  Elapsed: 1.47h  |  ETA: 3.97h
+    [Giant 970M]  Elapsed: 1.49h  |  ETA: 3.95h
+    [Giant 980M]  Elapsed: 1.51h  |  ETA: 3.94h
+    [Giant 990M]  Elapsed: 1.52h  |  ETA: 3.92h
+    [Giant 1000M]  Elapsed: 1.54h  |  ETA: 3.91h
+    [Giant 1010M]  Elapsed: 1.55h  |  ETA: 3.89h
+    [Giant 1020M]  Elapsed: 1.57h  |  ETA: 3.88h
+    [Giant 1030M]  Elapsed: 1.58h  |  ETA: 3.86h
+    [Giant 1040M]  Elapsed: 1.60h  |  ETA: 3.84h
+    [Giant 1050M]  Elapsed: 1.61h  |  ETA: 3.83h
+    [Giant 1060M]  Elapsed: 1.63h  |  ETA: 3.81h
+    [Giant 1070M]  Elapsed: 1.64h  |  ETA: 3.80h
+    [Giant 1080M]  Elapsed: 1.66h  |  ETA: 3.78h
+    [Giant 1090M]  Elapsed: 1.67h  |  ETA: 3.77h
+    [Giant 1100M]  Elapsed: 1.69h  |  ETA: 3.75h
+    [Giant 1110M]  Elapsed: 1.70h  |  ETA: 3.74h
+    [Giant 1120M]  Elapsed: 1.72h  |  ETA: 3.72h
+    [Giant 1130M]  Elapsed: 1.74h  |  ETA: 3.71h
+    [Giant 1140M]  Elapsed: 1.75h  |  ETA: 3.69h
+    [Giant 1150M]  Elapsed: 1.77h  |  ETA: 3.67h
+    [Giant 1160M]  Elapsed: 1.78h  |  ETA: 3.66h
+    [Giant 1170M]  Elapsed: 1.80h  |  ETA: 3.64h
+    [Giant 1180M]  Elapsed: 1.81h  |  ETA: 3.63h
+    [Giant 1190M]  Elapsed: 1.83h  |  ETA: 3.61h
+    [Giant 1200M]  Elapsed: 1.84h  |  ETA: 3.60h
+    [Giant 1210M]  Elapsed: 1.86h  |  ETA: 3.58h
+    [Giant 1220M]  Elapsed: 1.87h  |  ETA: 3.57h
+    [Giant 1230M]  Elapsed: 1.89h  |  ETA: 3.55h
+    [Giant 1240M]  Elapsed: 1.90h  |  ETA: 3.54h
+    [Giant 1250M]  Elapsed: 1.92h  |  ETA: 3.52h
+    [Giant 1260M]  Elapsed: 1.94h  |  ETA: 3.51h
+    [Giant 1270M]  Elapsed: 1.95h  |  ETA: 3.49h
+    [Giant 1280M]  Elapsed: 1.97h  |  ETA: 3.47h
+    [Giant 1290M]  Elapsed: 1.98h  |  ETA: 3.46h
+    [Giant 1300M]  Elapsed: 2.00h  |  ETA: 3.44h
+    [Giant 1310M]  Elapsed: 2.01h  |  ETA: 3.43h
+    [Giant 1320M]  Elapsed: 2.03h  |  ETA: 3.41h
+    [Giant 1330M]  Elapsed: 2.04h  |  ETA: 3.40h
+    [Giant 1340M]  Elapsed: 2.06h  |  ETA: 3.38h
+    [Giant 1350M]  Elapsed: 2.07h  |  ETA: 3.37h
+    [Giant 1360M]  Elapsed: 2.09h  |  ETA: 3.35h
+    [Giant 1370M]  Elapsed: 2.10h  |  ETA: 3.33h
+    [Giant 1380M]  Elapsed: 2.12h  |  ETA: 3.32h
+    [Giant 1390M]  Elapsed: 2.13h  |  ETA: 3.30h
+    [Giant 1400M]  Elapsed: 2.15h  |  ETA: 3.29h
+    [Giant 1410M]  Elapsed: 2.16h  |  ETA: 3.27h
+    [Giant 1420M]  Elapsed: 2.18h  |  ETA: 3.26h
+    [Giant 1430M]  Elapsed: 2.19h  |  ETA: 3.24h
+    [Giant 1440M]  Elapsed: 2.21h  |  ETA: 3.23h
+    [Giant 1450M]  Elapsed: 2.23h  |  ETA: 3.21h
+    [Giant 1460M]  Elapsed: 2.24h  |  ETA: 3.19h
+    [Giant 1470M]  Elapsed: 2.26h  |  ETA: 3.18h
+    [Giant 1480M]  Elapsed: 2.27h  |  ETA: 3.16h
+    [Giant 1490M]  Elapsed: 2.29h  |  ETA: 3.15h
+    [Giant 1500M]  Elapsed: 2.30h  |  ETA: 3.13h
+    [Giant 1510M]  Elapsed: 2.32h  |  ETA: 3.12h
+    [Giant 1520M]  Elapsed: 2.33h  |  ETA: 3.10h
+    [Giant 1530M]  Elapsed: 2.35h  |  ETA: 3.09h
+    [Giant 1540M]  Elapsed: 2.36h  |  ETA: 3.07h
+    [Giant 1550M]  Elapsed: 2.38h  |  ETA: 3.06h
+    [Giant 1560M]  Elapsed: 2.39h  |  ETA: 3.04h
+    [Giant 1570M]  Elapsed: 2.41h  |  ETA: 3.03h
+    [Giant 1580M]  Elapsed: 2.43h  |  ETA: 3.01h
+    [Giant 1590M]  Elapsed: 2.44h  |  ETA: 3.00h
+    [Giant 1600M]  Elapsed: 2.46h  |  ETA: 2.98h
+    [Giant 1610M]  Elapsed: 2.47h  |  ETA: 2.97h
+    [Giant 1620M]  Elapsed: 2.49h  |  ETA: 2.95h
+    [Giant 1630M]  Elapsed: 2.50h  |  ETA: 2.93h
+    [Giant 1640M]  Elapsed: 2.52h  |  ETA: 2.92h
+    [Giant 1650M]  Elapsed: 2.53h  |  ETA: 2.90h
+    [Giant 1660M]  Elapsed: 2.55h  |  ETA: 2.89h
+    [Giant 1670M]  Elapsed: 2.56h  |  ETA: 2.87h
+    [Giant 1680M]  Elapsed: 2.58h  |  ETA: 2.86h
+    [Giant 1690M]  Elapsed: 2.59h  |  ETA: 2.84h
+    [Giant 1700M]  Elapsed: 2.61h  |  ETA: 2.83h
+    [Giant 1710M]  Elapsed: 2.63h  |  ETA: 2.81h
+    [Giant 1720M]  Elapsed: 2.64h  |  ETA: 2.80h
+    [Giant 1730M]  Elapsed: 2.66h  |  ETA: 2.78h
+    [Giant 1740M]  Elapsed: 2.67h  |  ETA: 2.77h
+    [Giant 1750M]  Elapsed: 2.69h  |  ETA: 2.75h
+    [Giant 1760M]  Elapsed: 2.70h  |  ETA: 2.73h
+    [Giant 1770M]  Elapsed: 2.72h  |  ETA: 2.72h
+    [Giant 1780M]  Elapsed: 2.73h  |  ETA: 2.70h
+    [Giant 1790M]  Elapsed: 2.75h  |  ETA: 2.69h
+    [Giant 1800M]  Elapsed: 2.76h  |  ETA: 2.67h
+    [Giant 1810M]  Elapsed: 2.78h  |  ETA: 2.66h
+    [Giant 1820M]  Elapsed: 2.79h  |  ETA: 2.64h
+    [Giant 1830M]  Elapsed: 2.81h  |  ETA: 2.63h
+    [Giant 1840M]  Elapsed: 2.82h  |  ETA: 2.61h
+    [Giant 1850M]  Elapsed: 2.84h  |  ETA: 2.60h
+    [Giant 1860M]  Elapsed: 2.85h  |  ETA: 2.58h
+    [Giant 1870M]  Elapsed: 2.87h  |  ETA: 2.57h
+    [Giant 1880M]  Elapsed: 2.89h  |  ETA: 2.55h
+    [Giant 1890M]  Elapsed: 2.90h  |  ETA: 2.54h
+    [Giant 1900M]  Elapsed: 2.92h  |  ETA: 2.52h
+    [Giant 1910M]  Elapsed: 2.93h  |  ETA: 2.50h
+    [Giant 1920M]  Elapsed: 2.95h  |  ETA: 2.49h
+    [Giant 1930M]  Elapsed: 2.96h  |  ETA: 2.47h
+    [Giant 1940M]  Elapsed: 2.98h  |  ETA: 2.46h
+    [Giant 1950M]  Elapsed: 2.99h  |  ETA: 2.44h
+    [Giant 1960M]  Elapsed: 3.01h  |  ETA: 2.43h
+    [Giant 1970M]  Elapsed: 3.02h  |  ETA: 2.41h
+    [Giant 1980M]  Elapsed: 3.04h  |  ETA: 2.40h
+    [Giant 1990M]  Elapsed: 3.06h  |  ETA: 2.38h
+    [Giant 2000M]  Elapsed: 3.07h  |  ETA: 2.37h
+    [Giant 2010M]  Elapsed: 3.09h  |  ETA: 2.35h
+    [Giant 2020M]  Elapsed: 3.10h  |  ETA: 2.34h
+    [Giant 2030M]  Elapsed: 3.12h  |  ETA: 2.32h
+    [Giant 2040M]  Elapsed: 3.13h  |  ETA: 2.31h
+    [Giant 2050M]  Elapsed: 3.15h  |  ETA: 2.29h
+    [Giant 2060M]  Elapsed: 3.16h  |  ETA: 2.28h
+    [Giant 2070M]  Elapsed: 3.18h  |  ETA: 2.26h
+    [Giant 2080M]  Elapsed: 3.19h  |  ETA: 2.24h
+    [Giant 2090M]  Elapsed: 3.21h  |  ETA: 2.23h
+    [Giant 2100M]  Elapsed: 3.22h  |  ETA: 2.21h
+    [Giant 2110M]  Elapsed: 3.24h  |  ETA: 2.20h
+    [Giant 2120M]  Elapsed: 3.26h  |  ETA: 2.18h
+    [Giant 2130M]  Elapsed: 3.27h  |  ETA: 2.17h
+    [Giant 2140M]  Elapsed: 3.29h  |  ETA: 2.15h
+    [Giant 2150M]  Elapsed: 3.30h  |  ETA: 2.14h
+    [Giant 2160M]  Elapsed: 3.32h  |  ETA: 2.12h
+    [Giant 2170M]  Elapsed: 3.33h  |  ETA: 2.11h
+    [Giant 2180M]  Elapsed: 3.35h  |  ETA: 2.09h
+    [Giant 2190M]  Elapsed: 3.36h  |  ETA: 2.08h
+    [Giant 2200M]  Elapsed: 3.38h  |  ETA: 2.06h
+    [Giant 2210M]  Elapsed: 3.39h  |  ETA: 2.05h
+    [Giant 2220M]  Elapsed: 3.41h  |  ETA: 2.03h
+    [Giant 2230M]  Elapsed: 3.42h  |  ETA: 2.01h
+    [Giant 2240M]  Elapsed: 3.44h  |  ETA: 2.00h
+    [Giant 2250M]  Elapsed: 3.45h  |  ETA: 1.98h
+    [Giant 2260M]  Elapsed: 3.47h  |  ETA: 1.97h
+    [Giant 2270M]  Elapsed: 3.48h  |  ETA: 1.95h
+    [Giant 2280M]  Elapsed: 3.50h  |  ETA: 1.94h
+    [Giant 2290M]  Elapsed: 3.52h  |  ETA: 1.92h
+    [Giant 2300M]  Elapsed: 3.53h  |  ETA: 1.91h
+    [Giant 2310M]  Elapsed: 3.55h  |  ETA: 1.89h
+    [Giant 2320M]  Elapsed: 3.56h  |  ETA: 1.88h
+    [Giant 2330M]  Elapsed: 3.58h  |  ETA: 1.86h
+    [Giant 2340M]  Elapsed: 3.59h  |  ETA: 1.84h
+    [Giant 2350M]  Elapsed: 3.61h  |  ETA: 1.83h
+    [Giant 2360M]  Elapsed: 3.62h  |  ETA: 1.81h
+    [Giant 2370M]  Elapsed: 3.64h  |  ETA: 1.80h
+    [Giant 2380M]  Elapsed: 3.65h  |  ETA: 1.78h
+    [Giant 2390M]  Elapsed: 3.67h  |  ETA: 1.77h
+    [Giant 2400M]  Elapsed: 3.69h  |  ETA: 1.75h
+    [Giant 2410M]  Elapsed: 3.70h  |  ETA: 1.74h
+    [Giant 2420M]  Elapsed: 3.72h  |  ETA: 1.72h
+    [Giant 2430M]  Elapsed: 3.73h  |  ETA: 1.71h
+    [Giant 2440M]  Elapsed: 3.75h  |  ETA: 1.69h
+    [Giant 2450M]  Elapsed: 3.76h  |  ETA: 1.68h
+    [Giant 2460M]  Elapsed: 3.78h  |  ETA: 1.66h
+    [Giant 2470M]  Elapsed: 3.79h  |  ETA: 1.65h
+    [Giant 2480M]  Elapsed: 3.81h  |  ETA: 1.63h
+    [Giant 2490M]  Elapsed: 3.83h  |  ETA: 1.62h
+    [Giant 2500M]  Elapsed: 3.84h  |  ETA: 1.60h
+    [Giant 2510M]  Elapsed: 3.86h  |  ETA: 1.58h
+    [Giant 2520M]  Elapsed: 3.87h  |  ETA: 1.57h
+    [Giant 2530M]  Elapsed: 3.89h  |  ETA: 1.55h
+    [Giant 2540M]  Elapsed: 3.90h  |  ETA: 1.54h
+    [Giant 2550M]  Elapsed: 3.92h  |  ETA: 1.52h
+    [Giant 2560M]  Elapsed: 3.93h  |  ETA: 1.51h
+    [Giant 2570M]  Elapsed: 3.95h  |  ETA: 1.49h
+    [Giant 2580M]  Elapsed: 3.96h  |  ETA: 1.48h
+    [Giant 2590M]  Elapsed: 3.98h  |  ETA: 1.46h
+    [Giant 2600M]  Elapsed: 3.99h  |  ETA: 1.45h
+    [Giant 2610M]  Elapsed: 4.01h  |  ETA: 1.43h
+    [Giant 2620M]  Elapsed: 4.03h  |  ETA: 1.42h
+    [Giant 2630M]  Elapsed: 4.04h  |  ETA: 1.40h
+    [Giant 2640M]  Elapsed: 4.06h  |  ETA: 1.39h
+    [Giant 2650M]  Elapsed: 4.07h  |  ETA: 1.37h
+    [Giant 2660M]  Elapsed: 4.09h  |  ETA: 1.35h
+  COLLISION  j=2,660,358,807, i=241,783,283
+
+  τ recovered  : 9422318653889560067
+  Matches true : True  ✓
+  τ·G == Q     : True  ✓
+  Baby steps   : 6.80h
+  Giant steps  : 4.09h  (2,660,358,807 steps)
+  Total BSGS   : 10.90h
+  [Step 4 done in 10.90h]
+
+  ================================================================
+  STEP 5 — KZG Forgery with Recovered τ
+  ================================================================
+  Recovered τ = 9422318653889560067
+
+  Real commitment   C_real   = (7504917395570725233, 7608340775988512878)
+  Fake commitment   C_fake   = (318150838218602009, 1594731000078306741)  (f_fake(x)=1+42x)
+  Poison commitment C_poison = (1724714393880080783, 8765041942048920052)  (real weights, weight[0]+9999)
+
+  C_real   on curve : True
+  C_fake   on curve : True
+  C_poison on curve : True
+
+  WHY FORGERY IS ACCEPTED:
+  The verifier checks:  e(C, H) == e(SRS[1], [f(τ)]₂)
+  Attacker knows τ → can create SRS_fake and prove ANY polynomial
+  Verifier using attacker's SRS_fake cannot distinguish C_fake from C_real.
+
+  FORGERY ACCEPTED — verifier cannot distinguish C_fake from C_real.
+
+  [Step 5 done in 0.4s]
+
+====================================================================
+  END-TO-END SUMMARY
+====================================================================
+
+  MNIST accuracy             : trained ✓
+  MNIST weight params (D)    : 1000
+  KZG commitment (real)      : (7504917395570725233, 7608340775988512878)
+  τ recovered by BSGS        : 9422318653889560067
+  Forgery commitment         : (318150838218602009, 1594731000078306741)
+  BSGS time                  : 10.90h
+
+  SECURITY ARGUMENT:
+  Classical BSGS on 64-bit: feasible (hours, ~137 GB RAM)
+  Classical BSGS on BN254 : impossible (2^127 steps, 2^127 GB)
+  Shor's quantum on BN254 : feasible in O((log n)³) ← the actual threat
+  Post-quantum KZG (e.g., FRI/STARK) does not use ECC → safe from Shor's
+
+
+====================================================================
+  FRI SESSION — Hash-based PC, Definition 2.2 (all 7 ops)
+  Post-Quantum Security for Artemis zkML — MTP2
+====================================================================
+
+  FRI uses SHA-256 Merkle tree (Poseidon in production).
+  No ECC, no tau, no SRS, no trusted setup.
+  BSGS / Shor's cannot apply — there is no cyclic group.
+
+  ── FRI SESSION A — PC.Setup ─────────────────────────────────
+
+==================================================================
+  PC.Setup  [FRI + Poseidon — Definition 2.2, Op 1]
+==================================================================
+  Degree bound     :  D = 5
+  Domain           :  xs = [0, 1, 2, 3, 4, 5, 6]
+  Domain size      :  D+2 = 7  points
+  Hash function    :  Poseidon (64-bit, t=9, alpha=5)
+  Prime field      :  p = 18446744073709551359
+  Nonce (field el) :  16001676446213117762  (random element of F_p)
+  Setup time       :  57.16 µs
+
+  ┌─────────────────────────────────────────────────────────┐
+  │  No secret trapdoor. No trusted setup. No toxic waste.  │
+  │  No SRS to generate. No ceremony required.              │
+  │  Security: Poseidon collision resistance over F_p.      │
+  └─────────────────────────────────────────────────────────┘
+==================================================================
+  FRI PC.Setup: no tau, no SRS, no trusted setup ✓
+
+  ── FRI SESSION B — PC.Commit ────────────────────────────────
+  Polynomial coefficients (first 6 MNIST weights): [134936, -84348, -27143, 49273, -87859, -88816]
+
+------------------------------------------------------------------
+  PC.Commit  [FRI+Poseidon — Merkle commitment]
+------------------------------------------------------------------
+  Polynomial g   :  g(X) = 134936 + -84348X + -27143X^2 + 49273X^3 + -87859X^4 + -88816X^5  (degree 5)
+  Domain         :  xs = [0, 1, 2, 3, 4, 5, 6]
+
+  Step 1 — Evaluate g at all domain points:
+    g(0) = 134936
+    g(1) = -103957
+    g(2) = -3996004
+    g(3) = -27730891
+    g(4) = -110922760
+    g(5) = -327268129
+    g(6) = -795203812
+
+  Step 2 — Hash each evaluation with Poseidon:
+    leaf[i] = Poseidon(g(xᵢ) mod p, nonce)
+    leaf[0] = Poseidon(134936, 16001676446213117762) = 7ea49222b41d2791
+    leaf[1] = Poseidon(18446744073709447402, 16001676446213117762) = cd80c6864c1b70d5
+    leaf[2] = Poseidon(18446744073705555355, 16001676446213117762) = e4dc86170db9de70
+    leaf[3] = Poseidon(18446744073681820468, 16001676446213117762) = 262633c407be75ac
+    leaf[4] = Poseidon(18446744073598628599, 16001676446213117762) = a2e976ea8fec44be
+    leaf[5] = Poseidon(18446744073382283230, 16001676446213117762) = 5e960ca5afd08111
+    leaf[6] = Poseidon(18446744072914347547, 16001676446213117762) = eb61bd5a9596009c
+
+  Step 3 — Build Merkle tree (internal nodes: Poseidon(left, right)):
+    Padded leaf count : 8
+    Number of levels  : 3
+    Root              : 61ca5fbede96cf57
+
+  Commitment root  :  61ca5fbede96cf57
+  Root size        :  8 bytes (Poseidon field element)
+  Commit time      :  182307.33 µs
+------------------------------------------------------------------
+  FRI PC.Commit: root=61ca5fbede96cf57 (32 bytes, SHA-256)
+  This is a hash — NOT an ECC point. No group structure.
+
+  ── FRI SESSION C — PC.Verify ────────────────────────────────
+
+------------------------------------------------------------------
+  PC.Verify  [Recompute and compare Poseidon Merkle root]
+------------------------------------------------------------------
+  Recomputed root  :  61ca5fbede96cf57
+  Committed root   :  61ca5fbede96cf57
+  Match            :  True
+  PC.Verify        :  1  ← VALID ✓
+  Verify time      :  181741.73 µs
+------------------------------------------------------------------
+  FRI PC.Verify: 1 ✓
+
+  ── FRI SESSION D — PC.Open + PC.Check (honest) ─────────────
+
+------------------------------------------------------------------
+  PC.Open  [Poseidon Merkle evaluation proof]
+------------------------------------------------------------------
+  Domain index   :  x = 1  (xs[1] = 1)
+  Evaluation     :  y = g(1) = -103957
+  Merkle path    :  3 sibling hashes (24 bytes)
+    path[0] = 7ea49222b41d2791
+    path[1] = 17616f2a8b4ac9c1
+    path[2] = a7d2b974aaed0035
+  Open time      :  14.61 µs
+------------------------------------------------------------------
+
+------------------------------------------------------------------
+  PC.Check  [Walk Poseidon Merkle path from leaf to root]
+------------------------------------------------------------------
+  Claimed y       :  -103957
+  Leaf hash       :  Poseidon(18446744073709447402, 16001676446213117762) = cd80c6864c1b70d5
+  Merkle path     :  3 sibling hashes
+
+  Walking Merkle path:
+    Step 1: pos=1 (right child)
+             sibling  = 7ea49222b41d2791
+             parent   = Poseidon(14808053854898974933, 9125579422707820433)
+             result   = 68845b932a297ade
+    Step 2: pos=0 (left child)
+             sibling  = 17616f2a8b4ac9c1
+             parent   = Poseidon(7531245164495993566, 1684749964129520065)
+             result   = a33d52ada6239b17
+    Step 3: pos=0 (left child)
+             sibling  = a7d2b974aaed0035
+             parent   = Poseidon(11762648707531774743, 12092931860178206773)
+             result   = 61ca5fbede96cf57
+
+  Computed root   :  61ca5fbede96cf57
+  Expected root   :  61ca5fbede96cf57
+  Match           :  True
+  PC.Check        :  1  ← VALID ✓
+  Check time      :  51121.85 µs
+------------------------------------------------------------------
+  FRI PC.Open(x=1): y=-103957
+  FRI PC.Check (honest): 1 ✓
+
+  ── FRI SESSION E — Forgery attempt (must FAIL) ─────────────
+
+------------------------------------------------------------------
+  PC.Check  [Walk Poseidon Merkle path from leaf to root]
+------------------------------------------------------------------
+  Claimed y       :  99999
+  Leaf hash       :  Poseidon(99999, 16001676446213117762) = bc2d16b51eb8f7dc
+  Merkle path     :  3 sibling hashes
+
+  Walking Merkle path:
+    Step 1: pos=1 (right child)
+             sibling  = 7ea49222b41d2791
+             parent   = Poseidon(13559519020242761692, 9125579422707820433)
+             result   = 9a09a254425b261b
+    Step 2: pos=0 (left child)
+             sibling  = 17616f2a8b4ac9c1
+             parent   = Poseidon(11099581239405520411, 1684749964129520065)
+             result   = ce5ca2460d45f260
+    Step 3: pos=0 (left child)
+             sibling  = a7d2b974aaed0035
+             parent   = Poseidon(14869938491424633440, 12092931860178206773)
+             result   = dc217fce2a82f744
+
+  Computed root   :  dc217fce2a82f744
+  Expected root   :  61ca5fbede96cf57
+  Match           :  False
+  PC.Check        :  0  ← INVALID ✗
+  Check time      :  51319.92 µs
+------------------------------------------------------------------
+  FRI PC.Check (fake y=99999): 0 ← FORGERY REJECTED ✓
+
+  ── FRI SESSION F — BSGS attempt on FRI root (must FAIL) ────
+  Attempting BSGS on FRI Merkle root...
+  BSGS requires Q = w*G (ECC point in cyclic group)
+  FRI root = 61ca5fbede96cf57 (SHA-256 bytes — NOT an ECC point)
+  FRI root as ECC point: (7046549840357412695, 0)
+  Is on curve: False — BSGS cannot proceed
+  BSGS FAILED — no group structure in SHA-256 output ✓
+
+  ── FRI SESSION G — PC.BatchOpen + PC.BatchCheck ────────────
+
+------------------------------------------------------------------
+  PC.BatchOpen  [Multiple Poseidon Merkle evaluation proofs]
+------------------------------------------------------------------
+  Opening at indices : [0, 1, 2]
+  Domain points      : [0, 1, 2]
+
+  ── x = 0 (index 0) ──
+    y = g(0) = 134936
+    Merkle path (3 hashes, 24 bytes):
+      path[0] = cd80c6864c1b70d5
+      path[1] = 17616f2a8b4ac9c1
+      path[2] = a7d2b974aaed0035
+  ── x = 1 (index 1) ──
+    y = g(1) = -103957
+    Merkle path (3 hashes, 24 bytes):
+      path[0] = 7ea49222b41d2791
+      path[1] = 17616f2a8b4ac9c1
+      path[2] = a7d2b974aaed0035
+  ── x = 2 (index 2) ──
+    y = g(2) = -3996004
+    Merkle path (3 hashes, 24 bytes):
+      path[0] = 262633c407be75ac
+      path[1] = 68845b932a297ade
+      path[2] = a7d2b974aaed0035
+
+  Total batch proof size :  72 bytes
+  BatchOpen time         :  93.97 µs
+------------------------------------------------------------------
+
+------------------------------------------------------------------
+  PC.BatchCheck  [Verify all Poseidon Merkle evaluation proofs]
+------------------------------------------------------------------
+  x= 0 (idx 0), y=134936: PASS ✓   root = 61ca5fbede96cf57
+  x= 1 (idx 1), y=-103957: PASS ✓   root = 61ca5fbede96cf57
+  x= 2 (idx 2), y=-3996004: PASS ✓   root = 61ca5fbede96cf57
+
+  BatchCheck result  :  1  ← ALL PROOFS VALID ✓
+  BatchCheck time    :  154281.94 µs
+------------------------------------------------------------------
+  FRI PC.BatchOpen: 3 Merkle paths ✓
+  FRI PC.BatchCheck: 1 ✓
+
+═══════════════════════════════════════════════════════
+  SECURITY COMPARISON: KZG (64-bit) vs FRI+Poseidon
+  Definition 2.2 — Lycklama et al. arXiv:2409.12055
+═══════════════════════════════════════════════════════
+  Operation      | KZG (64-bit)           | FRI+Poseidon
+  ───────────────┼────────────────────────┼─────────────────────
+  PC.Setup       | SRS with 64-bit tau    | nonce only, no tau
+  PC.Commit      | ECC point (64-bit)     | Merkle root (32B)
+  PC.Verify      | 1 ✓                    | 1 ✓
+  PC.Open        | quotient polynomial    | Merkle path
+  PC.Check       | 1 ✓ honest | 0 tamper  | 1 ✓ honest | 0 fake
+  PC.BatchOpen   | 1 proof point          | 3 Merkle paths
+  PC.BatchCheck  | 1 ✓                    | 1 ✓
+  ───────────────┼────────────────────────┼─────────────────────
+  BSGS attack    | tau recovered in 6.43h | FAILED (no group)
+  Shor's attack  | O((log n)^3) feasible  | FAILED (no group)
+  Forgery        | ACCEPTED (broken)      | REJECTED (secure)
+  Post-quantum   | 0 bits (broken)        | 128 bits (Grover)
+  Trusted setup  | REQUIRED               | ELIMINATED
+═══════════════════════════════════════════════════════
+  CONCLUSION: Replacing KZG with FRI+Poseidon in Artemis
+  eliminates all 3 quantum attack surfaces.
+  FRI has no ECC, no tau, no SRS — Shor's cannot be applied.
+  Roetteler et al. 2017: BN254 needs 2330 qubits on real
+  quantum hardware. FRI needs 0 qubits to remain secure.
+═══════════════════════════════════════════════════════
+
+  Output: /home/koteswar/MTP2/mtp2-post-quantum-artemis-zkml/results/kzg_full_experiment.txt
